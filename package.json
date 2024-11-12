@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "NODE_ENV=development nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -13,6 +13,7 @@
     "@nuxt/ui": "^2.19.2",
     "axios": "^1.7.7",
     "cookie-universal": "^2.2.2",
+    "dayjs": "^1.11.13",
     "nuxt": "^3.14.159",
     "vue": "latest",
     "vue-router": "latest"
