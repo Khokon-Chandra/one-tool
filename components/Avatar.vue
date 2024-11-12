@@ -17,6 +17,7 @@ const items = [
 const { $cookies } = useNuxtApp();
 
 const logout = () => {
+    $cookies.remove('auth_user_id');
     $cookies.remove('api_token');
     $cookies.remove('tenant_identifier');
     navigateTo('/login')

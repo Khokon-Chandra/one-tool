@@ -17,6 +17,18 @@ const page = ref(1);
 
 const showEvent = ref(null);
 
+const selectedItems = ref([])
+
+
+const isAllSelected = computed(() => {
+    if (courses.value && courses.value.data.length === selectedItems.value.length) {
+        return true;
+    }
+    return false;
+})
+
+
+
 const links = [{
     label: 'Dashboard',
     icon: 'i-heroicons-chart-pie',
@@ -47,6 +59,28 @@ const toggleEvent = (courseId) => {
         showEvent.value = courseId
     }
 }
+
+
+// Method to toggle individual item selection
+function toggleSelectItem(itemId) {
+    const index = selectedItems.value.indexOf(itemId)
+    if (index === -1) {
+        selectedItems.value.push(itemId)
+    } else {
+        selectedItems.value.splice(index, 1)
+    }
+}
+
+
+// Method to toggle "Select All" functionality
+function toggleSelectAll() {
+    if (isAllSelected.value) {
+        selectedItems.value = []
+    } else {
+        selectedItems.value = courses.value.data.map(item => item.id)
+    }
+}
+
 </script>
 
 <template>
@@ -58,9 +92,8 @@ const toggleEvent = (courseId) => {
             </template>
         </UBreadcrumb>
 
-        <TableSkeleton v-if="loading == true" />
 
-        <div v-if="!loading" class="flex justify-between items-center">
+        <div class="flex justify-between items-center">
             <div
                 class="flex gap-2 items-center border broder-gray-300 dark:border-gray-800/50 bg-white dark:bg-gray-800 px-2 py-1 rounded-md">
                 <UIcon name="i-heroicons-bars-2" class="text-md font-semibold text-gray-500 dark:text-gray-400" />
@@ -68,12 +101,16 @@ const toggleEvent = (courseId) => {
             </div>
 
             <div class="flex items-center gap-4">
-                <UInput icon="i-heroicons-magnifying-glass-20-solid" size="sm" color="white" trailing
+                <UInput icon="i-heroicons-magnifying-glass-20-solid" size="sm" color="blue" trailing
                     placeholder="Search..." />
 
                 <UButton color="blue" variant="solid">New Course</UButton>
             </div>
         </div>
+
+
+        <TableSkeleton v-if="loading == true" />
+
 
         <div v-if="!loading"
             class="bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-100 dark:border-gray-700/90 w-full overflow-x-auto">
@@ -81,7 +118,7 @@ const toggleEvent = (courseId) => {
                 <thead>
                     <tr>
                         <th class="th">
-                            <UCheckbox color="blue" :disabled="false" />
+                            <UCheckbox color="blue" @change="toggleSelectAll" :model-value="isAllSelected" />
                         </th>
                         <th class="th"></th>
                         <th class="th">Title</th>
@@ -95,22 +132,23 @@ const toggleEvent = (courseId) => {
                     <template v-for="course in courses.data">
                         <tr>
                             <td class="px-4 py-2 text-center td">
-                                <UCheckbox color="blue" :disabled="false" />
+                                <UCheckbox color="blue" :model-value="selectedItems.includes(course.id)"
+                                    @change="toggleSelectItem(course.id)" />
                             </td>
                             <td class="td">
                                 <div class="flex gap-6 items-center">
                                     <UIcon @click="toggleEvent(course.id)"
                                         class="text-xl font-bold text-blue-600 cursor-pointer"
                                         :name="showEvent == course.id ? 'i-heroicons-chevron-up' : 'i-heroicons-chevron-down'" />
-                                    <nuxt-link :to="'seminars/' + course.id">
+                                    <nuxt-link :to="'seminars/' + course.id" title="show">
                                         <UIcon class="text-xl font-bold text-blue-600 cursor-pointer"
                                             name="i-heroicons-arrow-top-right-on-square" />
                                     </nuxt-link>
-                                    <UIcon class="text-xl font-bold text-blue-600 cursor-pointer"
+                                    <UIcon title="Duplicate" class="text-xl font-bold text-blue-600 cursor-pointer"
                                         name="i-heroicons-square-2-stack" />
-                                    <UIcon class="text-xl font-bold text-blue-600 cursor-pointer"
+                                    <UIcon title="Download Pdf" class="text-xl font-bold text-blue-600 cursor-pointer"
                                         name="i-heroicons-document-check" />
-                                    <UIcon class="text-xl font-bold text-blue-600 cursor-pointer"
+                                    <UIcon title="Delete" class="text-xl font-bold text-blue-600 cursor-pointer"
                                         name="i-heroicons-trash" />
                                 </div>
                             </td>

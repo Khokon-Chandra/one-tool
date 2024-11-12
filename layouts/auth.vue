@@ -35,10 +35,10 @@
                             <USelect color="blue" :options="['Jhone Abraham', 'Prime', 'Auth']" />
                         </div>
 
-                        <div class="flex items-center gap-4">
-                            <div class="max-w-xl">
-                                <UInput class="w-lg" icon="i-heroicons-magnifying-glass-20-solid" size="sm"
-                                    color="white" :trailing="false" placeholder="Search..." />
+                        <div class="flex justify-end items-center gap-4 flex-1">
+                            <div class="max-w-xl flex-1">
+                                <UInput class="w-full" icon="i-heroicons-magnifying-glass-20-solid" size="sm"
+                                    color="Slate" :trailing="false" placeholder="Search..." />
                             </div>
                             <div>
                                 <UIcon class="text-xl cursor-pointer" name="i-heroicons-bell" />
@@ -61,7 +61,7 @@
 <style scoped>
 /* Light Theme Scrollbar */
 .scrollbar-light::-webkit-scrollbar {
-    width: 5px;
+    width: 10px;
 }
 
 .scrollbar-light::-webkit-scrollbar-track {
@@ -77,7 +77,7 @@
 
 /* Dark Theme Scrollbar */
 .scrollbar-dark::-webkit-scrollbar {
-    width: 5px;
+    width: 10px;
 }
 
 .scrollbar-dark::-webkit-scrollbar-track {

@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import cookies from '~/plugins/cookies';
 
-const { $cookies, $loginInstance } = useNuxtApp()
+const { $cookies, $loginInstance, $axios } = useNuxtApp()
 
 const loading = ref(false);
 
@@ -33,8 +33,9 @@ const handleLogin = async () => {
     try {
         loading.value = true;
 
-        const response = await $loginInstance.post('/auth/user', form);
+        const response = await $axios.post('/auth/user', form);
 
+        $cookies.set('auth_user_id', response.data.id);
         $cookies.set('api_token', response.data.api_token);
         $cookies.set('tenant_identifier', response.data.tenant_identifier);
 
@@ -59,17 +60,22 @@ const handleLogin = async () => {
 
             <div>
                 <label class="text-gray-500 dark:text-gray-400 mb-1" for="email">E-Mail</label>
-                <UInput class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500" color="blue" variant="none" v-model="form.email" />
+                <UInput
+                    class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500"
+                    color="blue" variant="none" v-model="form.email" type="email" />
             </div>
 
             <div>
                 <label class="text-gray-500 dark:text-gray-400 mb-1" for="">Password</label>
                 <div class="relative">
-                    <UInput class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500" v-model="form.password" color="blue" variant="none"
+                    <UInput
+                        class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500"
+                        v-model="form.password" color="blue" variant="none"
                         :type="passwordShow ? 'text' : 'password'" />
                     <div @click="togglePasswordVisibility"
                         class="absolute top-0 right-0 flex items-center justify-center h-full pr-3 cursor-pointer">
-                        <UIcon v-if="passwordShow == false" name="i-heroicons-eye" class="size-4 text-gray-600 dark:text-gray-300" />
+                        <UIcon v-if="passwordShow == false" name="i-heroicons-eye"
+                            class="size-4 text-gray-600 dark:text-gray-300" />
                         <UIcon v-else name="i-heroicons-eye-slash" class="size-4 text-gray-600 dark:text-gray-300" />
                     </div>
                 </div>
