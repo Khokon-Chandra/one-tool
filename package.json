@@ -10,12 +10,20 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^43.3.1",
+    "@ckeditor/ckeditor5-vue": "^7.2.0",
     "@nuxt/ui": "^2.19.2",
     "axios": "^1.7.7",
+    "ckeditor5": "^43.3.1",
     "cookie-universal": "^2.2.2",
+    "date-fns": "^2.30.0",
     "dayjs": "^1.11.13",
     "nuxt": "^3.14.159",
+    "v-calendar": "^3.1.2",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "vue-gtag-next": "^1.14.0"
   }
 }

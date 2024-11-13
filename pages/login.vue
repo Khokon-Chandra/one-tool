@@ -13,6 +13,10 @@ const form = reactive({
     password: ''
 })
 
+const emailError = ref(null)
+
+const passwordError = ref(null)
+
 const errorMessage = ref(null)
 
 useHead({
@@ -29,7 +33,34 @@ const togglePasswordVisibility = () => {
     passwordShow.value = !passwordShow.value
 }
 
+
+
+// Validate email format with regex
+const validateEmail = () => {
+    emailError.value = ''
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!form.email) {
+        emailError.value = 'Email is required'
+    } else if (!emailRegex.test(form.email)) {
+        emailError.value = 'Invalid email format'
+    }
+}
+
+// Validate password (non-empty check)
+const validatePassword = () => {
+    passwordError.value = form.password ? '' : 'Password is required'
+}
+
+
+
 const handleLogin = async () => {
+
+    validateEmail();
+    
+    validatePassword();
+
+    if (emailError.value || passwordError.value) return false;
+
     try {
         loading.value = true;
 
@@ -46,6 +77,7 @@ const handleLogin = async () => {
     } catch (error) {
         loading.value = false;
         errorMessage.value = error.response.data.message
+        form.password = '';
     }
 }
 
@@ -60,16 +92,18 @@ const handleLogin = async () => {
 
             <div>
                 <label class="text-gray-500 dark:text-gray-400 mb-1" for="email">E-Mail</label>
-                <UInput
-                    class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500"
+                <UInput @input="validateEmail"
+                    inputClass="rounded-none text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
                     color="blue" variant="none" v-model="form.email" type="email" />
+                <p v-if="emailError" class="text-xs text-gray-500 dark:text-gray-400">{{ emailError }}</p>
+
             </div>
 
             <div>
                 <label class="text-gray-500 dark:text-gray-400 mb-1" for="">Password</label>
                 <div class="relative">
-                    <UInput
-                        class="text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:outline-none focus:border-blue-500"
+                    <UInput @input="validatePassword"
+                        inputClass="rounded-none text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700 focus:border-blue-500 dark:focus:border-blue-500"
                         v-model="form.password" color="blue" variant="none"
                         :type="passwordShow ? 'text' : 'password'" />
                     <div @click="togglePasswordVisibility"
@@ -79,16 +113,18 @@ const handleLogin = async () => {
                         <UIcon v-else name="i-heroicons-eye-slash" class="size-4 text-gray-600 dark:text-gray-300" />
                     </div>
                 </div>
+                <p v-if="passwordError" class="text-xs text-gray-500 dark:text-gray-400">{{ passwordError }}</p>
             </div>
 
 
             <div>
                 <UButton :loading="loading" @click.prevent="handleLogin"
-                    class="btn-gradient bg-blue-600 focus:ring-blue-600 ring-offset-1 ring-1" block>Login</UButton>
+                    class="btn-gradient bg-blue-600 focus:ring-blue-600 ring-offset-1 ring-1 dark:ring-offset-transparent py-2"
+                    block>Login</UButton>
             </div>
 
             <div v-if="errorMessage"
-                class="p-4 flex gap-4 items-center rounded-md bg-red-100 border-l-4 border-red-500">
+                class="p-4 flex gap-4 items-center rounded-md bg-red-500/10 border-l-4 border-red-500">
                 <UIcon name="i-heroicons-x-circle" class="size-8 text-red-600" />
                 <span class="text-red-600">{{ errorMessage }}</span>
             </div>

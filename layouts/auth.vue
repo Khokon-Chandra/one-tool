@@ -14,7 +14,7 @@
                 <div class="flex-grow flex flex-col min-h-0 gap-y-2 py-2">
                     <div class="flex-1 px-4 flex flex-col gap-y-2 overflow-y-auto">
                         <ul class="relative !min-h-[auto] !min-w-[auto] space-y-1">
-                            <nav-link link="/" icon="i-heroicons-chart-pie">Dashboard</nav-link>
+                            <nav-link link="./" icon="i-heroicons-chart-pie">Dashboard</nav-link>
                             <nav-link link="/seminars" icon="i-heroicons-academic-cap">Seminar</nav-link>
                         </ul>
                     </div>
