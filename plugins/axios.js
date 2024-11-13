@@ -1,8 +1,20 @@
 import axios from 'axios'
 
+
+
 export default defineNuxtPlugin(nuxtApp => {
+
+  const config = useRuntimeConfig()
+
   const axiosInstance = axios.create({
-    baseURL: 'https://my.1tool.com/suite/api',
+    baseURL: config.public.prodBase,
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+
+  const loginInstance = axios.create({
+    baseURL: config.public.apiBase,
     headers: {
       'Content-Type': 'application/json'
     }
@@ -18,4 +30,5 @@ export default defineNuxtPlugin(nuxtApp => {
   })
 
   nuxtApp.provide('axios', axiosInstance)
+  nuxtApp.provide('loginInstance', loginInstance)
 })

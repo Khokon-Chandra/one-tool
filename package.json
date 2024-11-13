@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "dev": "nuxt dev",
+    "dev": "NODE_ENV=development nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
@@ -13,8 +13,14 @@
     "@nuxt/ui": "^2.19.2",
     "axios": "^1.7.7",
     "cookie-universal": "^2.2.2",
+    "date-fns": "^2.30.0",
+    "dayjs": "^1.11.13",
     "nuxt": "^3.14.159",
+    "v-calendar": "^3.1.2",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "vue-gtag-next": "^1.14.0"
   }
 }
