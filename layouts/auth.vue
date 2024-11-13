@@ -1,6 +1,51 @@
+<script setup lang="ts">
+
+const isOpenSlideOver = ref(false)
+
+
+const links = [{
+    label: 'Dashboard',
+    to: '/',
+    icon: 'i-heroicons-document-magnifying-glass'
+}, {
+    label: 'Seminars',
+    to: '/seminars',
+    icon: 'i-heroicons-academic-cap',
+}, {
+    label: 'Calendar',
+    to: '/calendars',
+    icon: 'i-heroicons-calendar-20-solid'
+},
+{
+    label: 'Contact',
+    to: '/contacts',
+    icon: 'i-heroicons-user'
+}
+]
+</script>
+
 <template>
     <div class="h-screen w-screen overflow-hidden fixed inset-0 flex">
 
+
+        <USlideover side="left" v-model="isOpenSlideOver">
+            <div class="p-4 flex-1">
+
+                <div class="flex justify-between items-center p-4">
+
+                    <logo class="w-16" />
+
+                    <UButton color="red" variant="ghost" size="sm" icon="i-heroicons-x-mark-20-solid" class="text-lg"
+                        square padded @click="isOpenSlideOver = false" />
+
+                </div>
+
+
+                <div class="">
+                    <UVerticalNavigation :links="links" />
+                </div>
+            </div>
+        </USlideover>
 
         <nav class="flex-col items-stretch relative w-full border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 shadow-lg bg-white dark:bg-gray-800 lg:w-[262px] flex-shrink-0 hidden lg:flex"
             style="width:250px">
@@ -10,18 +55,14 @@
                 <logo class="w-16" />
             </div>
 
-            <div class="flex flex-col w-full flex-1 relative overflow-hidden">
+            <div class="flex flex-col w-full flex-1 overflow-hidden">
                 <div class="flex-grow flex flex-col min-h-0 gap-y-2 py-2">
                     <div class="flex-1 px-4 flex flex-col gap-y-2 overflow-y-auto">
-                        <ul class="relative !min-h-[auto] !min-w-[auto] space-y-1">
-                            <nav-link link="./" icon="i-heroicons-chart-pie">Dashboard</nav-link>
-                            <nav-link link="/seminars" icon="i-heroicons-academic-cap">Seminar</nav-link>
-                        </ul>
+                        <UVerticalNavigation :links="links" />
                     </div>
                 </div>
             </div>
         </nav>
-
 
         <main class="flex flex-1 w-full min-w-0">
             <div class="flex-col items-stretch relative w-full flex-1 flex">
@@ -31,7 +72,8 @@
                     <div class="flex items-center justify-between flex-1 gap-x-1.5 min-w-0">
 
                         <div class="flex gap-3 items-center">
-                            <UIcon class="flex lg:hidden text-2xl cursor-pointer" name="i-heroicons-bars-3" />
+                            <UIcon @click="isOpenSlideOver = true" class="flex lg:hidden text-2xl cursor-pointer"
+                                name="i-heroicons-bars-3" />
                             <USelect color="blue" :options="['Jhone Abraham', 'Prime', 'Auth']" />
                         </div>
 
@@ -55,6 +97,7 @@
                 </div>
             </div>
         </main>
+
     </div>
 </template>
 
