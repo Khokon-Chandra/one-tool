@@ -30,14 +30,14 @@ const logout = () => {
         <UCard class="text-center">Welcome to 1Tool application!!</UCard>
 
         <div class="flex gap-4 justify-between items-center">
-            <UCard class="w-full bg-white">
+            <UCard class="w-full bg-white dark:bg-gray-800">
                 Dashboard Content goes here
                 <p class="text-xs font-thin text-gray-400">Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Pariatur, temporibus excepturi minima quas libero beatae impedit totam consequuntur odio amet labore
                     dolores ratione non blanditiis quibusdam eius repellat soluta molestias.</p>
             </UCard>
 
-            <UCard class="w-full bg-white">
+            <UCard class="w-full bg-white dark:bg-gray-800">
                 Dashboard Content goes here
                 <p class="text-xs font-thin text-gray-400">Lorem ipsum dolor sit amet consectetur adipisicing elit.
                     Pariatur, temporibus excepturi minima quas libero beatae impedit totam consequuntur odio amet labore
