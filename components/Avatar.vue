@@ -1,17 +1,18 @@
 <script setup>
 const items = [
     [{
-        label: 'ben@example.com',
+        label: 'demo@1tool.com',
         slot: 'account',
         disabled: true
     }], [{
         label: 'Settings',
         icon: 'i-heroicons-cog-8-tooth'
-    }], , [{
+    },
+    {
         label: 'Sign out',
         slot: 'logout',
         icon: 'i-heroicons-arrow-left-on-rectangle'
-    }]
+    }],
 ];
 
 const { $cookies } = useNuxtApp();

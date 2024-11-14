@@ -9,7 +9,7 @@ const { $axios } = useNuxtApp();
 
 const toast = useToast();
 
-const courses = ref([]);
+const courses = ref(null);
 
 const loading = ref(true);
 
@@ -18,6 +18,8 @@ const page = ref(1);
 const showEvent = ref(null);
 
 const selectedItems = ref([])
+
+const activeTab = ref('all');
 
 
 const isAllSelected = computed(() => {
@@ -84,7 +86,7 @@ function toggleSelectAll() {
 </script>
 
 <template>
-    <div class="space-y-4">
+    <div class="space-y-6">
 
         <UBreadcrumb :links="links" :ui="{ ol: 'gap-x-3', li: 'gap-x-3' }">
             <template #divider>
@@ -93,16 +95,40 @@ function toggleSelectAll() {
         </UBreadcrumb>
 
 
+        <div v-show="0" class="flex items-center">
+
+            <button @click="activeTab = 'all'" :class="{
+                'border-blue-500 text-blue-500': activeTab == 'all',
+                'border-b-gray-200 dark:border-gray-800 text-gray-500': activeTab !== 'all'
+            }" class="px-6 py-1 text-sm font-medium border-b-2 hover:bg-gray-600/10">All</button>
+
+
+            <button @click="activeTab = 'meine'" :class="{
+                'border-blue-500 text-blue-500': activeTab == 'meine',
+                'border-b-gray-200 dark:border-gray-800 text-gray-500': activeTab !== 'meine'
+            }" class="px-6 py-1 text-sm font-medium border-b-2 hover:bg-gray-600/10">Meine</button>
+
+
+            <button @click="activeTab = 'shorts'" :class="{
+                'border-blue-500 text-blue-500': activeTab == 'shorts',
+                'border-b-gray-200 dark:border-gray-800 text-gray-500': activeTab !== 'shorts'
+            }" class="px-6 py-1 text-sm font-medium border-b-2 hover:bg-gray-600/10">Shorts</button>
+
+
+        </div>
+
+
         <div class="flex justify-between items-center">
-            <div
-                class="flex gap-2 items-center border broder-gray-300 dark:border-gray-800/50 bg-white dark:bg-gray-800 px-2 py-1 rounded-md">
-                <UIcon name="i-heroicons-bars-2" class="text-md font-semibold text-gray-500 dark:text-gray-400" />
-                <span class="text-sm font-semibold text-gray-500 dark:text-gray-400">Filter</span>
-            </div>
+            <UButton icon="i-heroicons-bars-2" size="sm" color="gray" variant="solid" label="Filter"
+                :trailing="false" />
+
+
 
             <div class="flex items-center gap-4">
                 <UInput icon="i-heroicons-magnifying-glass-20-solid" size="sm" color="blue" trailing
                     placeholder="Search..." />
+
+                <UButton color="gray">Columns</UButton>
 
                 <UButton color="blue" variant="solid">New Course</UButton>
             </div>
@@ -112,8 +138,8 @@ function toggleSelectAll() {
         <TableSkeleton v-if="loading == true" />
 
 
-        <div v-if="!loading"
-            class="bg-white dark:bg-gray-800 shadow-lg rounded-md border border-gray-100 dark:border-gray-700/90 w-full overflow-x-auto">
+        <div v-if="courses"
+            class="bg-white dark:bg-gray-800 shadow-sm rounded-md border border-gray-200 dark:border-gray-700/90 w-full overflow-x-auto">
             <table class="table-auto w-full">
                 <thead>
                     <tr>

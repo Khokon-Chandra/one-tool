@@ -7,7 +7,7 @@ useSeoMeta({
   ogDescription: 'This is my amazing site, let me tell you all about it.',
   ogImage: 'https://example.com/image.png',
   twitterCard: 'summary_large_image',
-  link:[
+  link: [
     { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
     { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicon_32.png' }, // PNG icon
 
@@ -19,7 +19,13 @@ useSeoMeta({
 <template>
   <div>
     <NuxtLayout>
+
+      <UNotifications />
+
       <NuxtPage />
+
     </NuxtLayout>
+
+
   </div>
 </template>
