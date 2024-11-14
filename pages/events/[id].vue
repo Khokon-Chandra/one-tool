@@ -274,7 +274,7 @@ const updateEvent = async (callback) => {
                                 <UPopover v-model:open="popovers.startDate" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.start_time = event.start_time"
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                            dayjs(event.start_time).format('d. MM. YYYY HH:mm')
+                                            dayjs(event.start_time).format('DD. MM. YYYY HH:mm')
                                         }}</span>
 
                                     <template #panel>
@@ -311,7 +311,7 @@ const updateEvent = async (callback) => {
                                     <span color="white" variant="none"
                                         @click="payload.end_time = dayjs(event.end_time).format('d/MM/YYYY')"
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                            dayjs(event.end_time).format('d. MM. YYYY HH:mm')
+                                            dayjs(event.end_time).format('DD. MM. YYYY HH:mm')
                                         }}</span>
 
                                     <template #panel>
