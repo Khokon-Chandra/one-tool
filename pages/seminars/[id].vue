@@ -118,7 +118,7 @@ const populatePayload = (courseData) => {
         course_category_id: courseData.course_category_id,
         parent_id: courseData.parent_id,
         is_overnight_stay_available: courseData.is_overnight_stay_available,
-        created_by: courseData.created_by,
+        user_id: courseData.created_by,
         updated_by: $cookies.get('auth_user_id') || 0,
         max_number: courseData.max_number,
         has_single_event: courseData.has_single_event,
@@ -141,13 +141,13 @@ onMounted(async () => {
 
         fetchCalendarCategories();
 
-
     } catch (error) {
-        console.error('Error loading data:', error);
+        toast.add({ title: error.message });
     } finally {
         loading.value = false;
     }
 });
+
 
 // Update Course Function
 const updateCourse = async (callback) => {
@@ -177,7 +177,7 @@ const updateCourse = async (callback) => {
             </template>
         </UBreadcrumb>
 
-        <create-event v-model="isOpenEventModal" :categories="CalendarCagegories" />
+        <create-event v-model="isOpenEventModal" :categories="CalendarCagegories" @saved="fetchCourseDetails" />
 
         <TableSkeleton v-if="loading == true" />
 
@@ -237,7 +237,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.subtitle
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.subtitle || 'Subtitle'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -273,7 +273,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.number
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.number || 'Shorthand symbol'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -313,7 +313,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.course_category_id
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         selectedCategory || 'course category'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -360,7 +360,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.parent_id
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
                                         parentCourseName || 'Parent course'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -470,7 +470,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.goals
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.goals || 'Goals'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -503,7 +503,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.teaser
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.teaser || 'Teaser'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
