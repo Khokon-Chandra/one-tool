@@ -5,6 +5,11 @@ definePageMeta({
     middleware: "auth",
     layout: "auth",
 });
+
+useHead({
+    titleTemplate: '%s - Seminars'
+})
+
 const { $axios } = useNuxtApp();
 
 const toast = useToast();

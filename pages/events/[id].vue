@@ -6,6 +6,10 @@ definePageMeta({
     layout: "auth",
 });
 
+useHead({
+    titleTemplate: '%s - Event Details'
+})
+
 
 const { $axios, $cookies } = useNuxtApp();
 
@@ -231,10 +235,9 @@ const updateEvent = async (callback) => {
                         <td class="td">
                             <div class="inline-block">
                                 <UPopover v-model:open="popovers.category" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.calendar_categories_id = event.calendar_categories_id"
-
+                                    <span color="white" variant="none"
+                                        @click="payload.calendar_categories_id = event.calendar_categories_id"
                                         :class="{ 'text-gray-400 border-b border-dotted italic': !event.calendar_categories_id }"
-
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
                                             event.category?.name || 'category' }}</span>
 
@@ -244,8 +247,9 @@ const updateEvent = async (callback) => {
                                             Title</h1>
                                         <div
                                             class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <USelect class="flex-1" color="blue" v-model="payload.calendar_categories_id" :options="categories" option-attribute="name"
-                                                 />
+                                            <USelect class="flex-1" color="blue"
+                                                v-model="payload.calendar_categories_id" :options="categories"
+                                                option-attribute="name" />
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateEvent(function () {
@@ -568,7 +572,7 @@ const updateEvent = async (callback) => {
                         </td>
                     </tr>
 
-                 
+
 
                 </table>
 

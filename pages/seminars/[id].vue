@@ -7,6 +7,10 @@ definePageMeta({
     layout: 'auth'
 });
 
+useHead({
+    titleTemplate: '%s - Seminars-Details'
+})
+
 // Nuxt 3 App-level injections
 const { $axios, $cookies } = useNuxtApp();
 const toast = useToast();
