@@ -6,50 +6,64 @@ definePageMeta({
     layout: "auth",
 });
 
-/**
- * Popover constants
- */
-const openTitle = ref(false)
-const openSubtitle = ref(false)
-const openShorthandSymbol = ref(false);
-const openCategory = ref(false);
-const openCourse = ref(false);
-
 
 const { $axios, $cookies } = useNuxtApp();
 
 const toast = useToast();
 
-const event = ref([]);
+const event = ref(null);
+
+const eventList = ref(null);
 
 const categories = ref([]);
-
-const eventList = ref([]);
 
 const loading = ref(true);
 
 const updateLoading = ref(false);
 
-const page = ref(1);
-
 const eventId = useRoute().params.id
 
-
-const eventCreateModal = ref(false);
-
-
+/**
+ * form submition payload data to update event
+ */
 const payload = reactive({
     id: '',
     title: '',
-    subtitle: '',
-    is_overnight_stay_available: '',
+    calendar_categories_id: '',
+    start_time: '',
+    end_time: '',
     created_by: '',
     updated_by: 0,
-    max_number: '',
-    has_single_event: 0,
+    is_all_day: false,
+    duration: '',
+    contact_id: '',
+    credits: '',
+    organizer: '',
+    parent_id: '',
+    creation_time: '',
 });
 
 
+/**
+ * Popover constants
+ */
+const popovers = ref({
+    title: false,
+    category: false,
+    startDate: false,
+    endDate: false,
+    contactPerson: false,
+    duration: false,
+    credits: false,
+    parentEvent: false,
+    organizer: false,
+    referee: false,
+    rooms: false,
+    street: false,
+})
+
+
+// Breadcumbar links 
 const links = reactive([{
     label: 'Dashboard',
     icon: 'i-heroicons-chart-pie',
@@ -66,89 +80,89 @@ const links = reactive([{
 }]);
 
 
+const fetchSingleEvent = async () => {
+    const response = await $axios.get("/calendar-events/" + eventId + "?include=category,user");
+    event.value = response.data.data;
+    populatePayload(event.value);
+}
+
+const fetchEventList = async () => {
+    const response = await $axios.get("/calendar-events?per_page=100");
+    eventList.value = response.data.data.map((item) => {
+        return { name: item.title, value: item.id }
+    });
+}
+
+const fetchCategories = async () => {
+    const response = await $axios.get('/calendar-categories')
+    categories.value = response.data.data.map((item) => {
+        return { name: item.name, value: item.id }
+    });
+}
+
 onMounted(async () => {
     try {
 
-        const eventResponse = await $axios.get("/calendar-events/" + eventId + "?include=category");
-        
-        const categoriesResponse = await $axios.get('/course-categories');
-
-        event.value = eventResponse.data.data;
-
-        categories.value = categoriesResponse.data.data.map((item) => {
-            return { name: item.name, value: item.id }
-        });
-
-        loading.value = false;
+        await Promise.all([
+            fetchSingleEvent(),
+            fetchEventList(),
+            fetchCategories()
+        ]);
 
         links[2].label = event.value.title;
 
-        /**
-         * Update event form attribute
-         */
-        payload.id = event.value.id;
-        payload.title = event.value.title;
-        payload.subtitle = event.value.subtitle;
-        payload.is_overnight_stay_available = event.value.is_overnight_stay_available;
-        payload.created_by = event.value.created_by;
-        payload.max_number = event.value.max_number;
-        payload.has_single_event = event.value.has_single_event;
-        payload.updated_by = $cookies.get('auth_user_id') || 0;
-        payload.has_single_event = event.value.has_single_event;
-
     } catch (error) {
         toast.add({ title: error.message });
+    } finally {
         loading.value = false;
     }
 });
 
-const selectedCategory = computed(() => {
-    if (!event.value.course_category_id) {
-        return false
-    }
-    return categories.value.filter((item) => {
-        return item.value == event.value.course_category_id
-    }).at(-1).name;
 
-});
+const populatePayload = (eventData) => {
+
+    Object.assign(payload, {
+        id: eventData.id,
+        title: eventData.title,
+        calendar_categories_id: eventData.calendar_categories_id,
+        updated_by: $cookies.get('auth_user_id') || 0,
+        start_time: eventData.start_time,
+        end_time: eventData.end_time,
+        creation_time: eventData.creation_time,
+        credits: eventData.credits,
+        is_all_day: eventData.is_all_day,
+        duration: eventData.duration,
+        contact_id: eventData.contact_id,
+        parent_id: eventData.parent_id,
+        organizer: eventData.organizer
+    })
+
+}
 
 
-const parentCourseName = computed(() => {
-    if (!event.value.parent_id) {
-        return false
-    }
-    return courseList.value.filter((item) => {
-        return item.id == event.value.parent_id
-    }).at(-1).title;
-
-});
-
-
-const updateCourse = async (callback) => {
+const updateEvent = async (callback) => {
 
     try {
 
         updateLoading.value = true;
 
-        const response = await $axios.put('/courses/' + event.value.id, payload);
+        const response = await $axios.put('/calendar-events/' + eventId, payload);
 
-        const data = response.data.data;
-
-        event.value = data;
+        await fetchSingleEvent();
 
         links[2].label = event.value.title;
 
-        updateLoading.value = false;
-
-        setTimeout(() => {
-            callback();
-        }, 1000);
+        callback?.();
 
     } catch (error) {
-        updateLoading.value = false;
+
         useToast().add({
-            title: error.message
+            title: "Event not updated!",
+            description: error.message
         })
+
+    } finally {
+        updateLoading.value = false;
     }
 }
 
@@ -164,12 +178,10 @@ const updateCourse = async (callback) => {
             </template>
         </UBreadcrumb>
 
-        <create-event @close-modal="eventCreateModal = false" :isOpen="eventCreateModal" />
-
         <TableSkeleton v-if="loading == true" />
 
-        <div v-if="!loading" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <UCard class="w-full bg-white dark:bg-gray-800">
+        <div v-if="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <UCard class="w-full bg-white dark:bg-gray-800 col-span-2">
                 <h4 class="text-sm font-medium text-teal-600 mb-2 uppercase">Event Details</h4>
                 <hr class="w-full dark:border-gray-700/90">
                 <h1 class="text-lg font-bold uppercase text-blue-500 my-3">{{ event.title }}</h1>
@@ -184,7 +196,7 @@ const updateCourse = async (callback) => {
                         <th class="th">Title</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openTitle" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.title" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.title = event.title"
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
                                             event.title
@@ -199,11 +211,11 @@ const updateCourse = async (callback) => {
                                             <UInput class="flex-1" color="blue" v-model="payload.title" type="search" />
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    openTitle = false
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.title = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openTitle = false"
+                                            <UButton class="rounded-sm" @click="popovers.title = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -213,31 +225,70 @@ const updateCourse = async (callback) => {
                             </div>
                         </td>
                     </tr>
+
                     <tr>
-                        <th class="th">Subtitle</th>
+                        <th class="th">Categories</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openSubtitle" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.subtitle = event.subtitle"
-                                        :class="{
-                                            'text-gray-400': !event.subtitle
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            event.subtitle || 'Subtitle'
+                                <UPopover v-model:open="popovers.category" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.calendar_categories_id = event.calendar_categories_id"
+
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.calendar_categories_id }"
+
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            event.category?.name || 'category' }}</span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Title</h1>
+                                        <div
+                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                            <USelect class="flex-1" color="blue" v-model="payload.calendar_categories_id" :options="categories" option-attribute="name"
+                                                 />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.category = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click="popovers.title = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <th class="th">Start Date</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.startDate" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.start_time = event.start_time"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            dayjs(event.start_time).format('d. MM. YYYY HH:mm')
                                         }}</span>
 
                                     <template #panel>
                                         <h1
                                             class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Subtitle</h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.subtitle"
-                                                type="search" />
+                                            Start Date</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+
+                                            <UInput type="date" class="flex-1" color="blue"
+                                                v-model="payload.start_time" />
+
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    openSubtitle = false
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.startDate = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openSubtitle = false"
+                                            <UButton class="rounded-sm" @click=" popovers.startDate = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -249,78 +300,32 @@ const updateCourse = async (callback) => {
                     </tr>
 
                     <tr>
-                        <th class="th">Shorthand symbol</th>
+                        <th class="th">End Date</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openShorthandSymbol" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.number = event.number" :class="{
-                                        'text-gray-400': !event.number
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        event.number || 'Shorthand symbol'
-                                    }}</span>
-
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Shorthand Symbol
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.number"
-                                                type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    openShorthandSymbol = false
-                                                })" :loading="updateLoading" />
-
-                                            <UButton class="rounded-sm" @click="openShorthandSymbol = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
-
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Seminar member</th>
-                        <td class="td">{{ event.max_number }}</td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Course Category</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="openCategory" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.endDate" :popper="{ arrow: true }">
                                     <span color="white" variant="none"
-                                        @click="payload.course_category_id = event.course_category_id" :class="{
-                                            'text-gray-400': !event.course_category_id
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            selectedCategory || 'event category'
+                                        @click="payload.end_time = dayjs(event.end_time).format('d/MM/YYYY')"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            dayjs(event.end_time).format('d. MM. YYYY HH:mm')
                                         }}</span>
 
                                     <template #panel>
                                         <h1
                                             class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Course Category
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <select
-                                                class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
-                                                v-model="payload.course_category_id">
-                                                <option v-for="category in categories" :key="category.value"
-                                                    :value="category.value">{{ category.name }}</option>
-                                            </select>
+                                            End Date</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
+                                            <UInput type="date" class="flex-1" color="blue"
+                                                v-model="payload.end_time" />
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    openCategory = false
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.endDate = false
                                                 })" :loading="updateLoading" />
 
-
-                                            <UButton class="rounded-sm" @click="openCategory = false"
+                                            <UButton class="rounded-sm" @click=" popovers.endDate = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -332,43 +337,32 @@ const updateCourse = async (callback) => {
                     </tr>
 
                     <tr>
-                        <td class="py-4"></td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Parent Course</th>
+                        <th class="th">Contact persons</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openCourse" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.parent_id = event.parent_id"
-                                        :class="{
-                                            'text-gray-400': !event.parent_id
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                            parentCourseName || 'Parent event'
+                                <UPopover v-model:open="popovers.endDate" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.contact_id = event.contact_id"
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.contact_id }"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            event.contact_id || 'Contact persons'
                                         }}</span>
 
                                     <template #panel>
                                         <h1
                                             class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Parent Course
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <select
-                                                class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
-                                                v-model="payload.parent_id">
-                                                <option v-for="item in courseList" :key="item.id" :value="item.id">{{
-                                                    item.title }}</option>
-                                            </select>
+                                            Contact persons</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
+                                            <UInput type="date" class="flex-1" color="blue"
+                                                v-model="payload.contact_id" />
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    openCourse = false
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.contactPerson = false
                                                 })" :loading="updateLoading" />
 
-
-                                            <UButton class="rounded-sm" @click="openCourse = false"
+                                            <UButton class="rounded-sm" @click=" popovers.contactPerson = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -379,17 +373,140 @@ const updateCourse = async (callback) => {
                         </td>
                     </tr>
 
+
                     <tr>
-                        <th class="th">Course includes only one event</th>
+                        <th class="th">Duration (Days)</th>
                         <td class="td">
-                            <UToggle color="blue" :model-value="payload.has_single_event" @click="(() => {
-                                payload.has_single_event = !payload.has_single_event;
-                                updateCourse(function () {
-                                    return;
-                                })
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.duration" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.duration = event.duration"
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.duration }"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            event.duration || 'Duration (Days)'
+                                        }}</span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Duration (Days)</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[450px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+
+                                            <UInput type="text" class="flex-1" color="blue"
+                                                v-model="payload.duration" />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.duration = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click=" popovers.duration = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <th class="th">Credits</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.credits" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.credits = event.credits"
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.credits }"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            event.credits || 'Credits'
+                                        }}</span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Credits</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[450px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+
+                                            <UInput type="text" class="flex-1" color="blue" v-model="payload.credits" />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.credits = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click=" popovers.credits = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
+
+                    <tr>
+                        <th class="py-4"></th>
+                        <th></th>
+                    </tr>
+
+                    <tr>
+                        <th class="th">All Day</th>
+                        <td class="td">
+                            <UToggle color="blue" v-model="payload.is_all_day" @click="(() => {
+                                payload.is_all_day = !event.is_all_day
+                                updateEvent();
                             })()" />
                         </td>
                     </tr>
+
+
+
+                    <tr>
+                        <th class="th">Parent Event</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.parentEvent" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.parent_id = event.parent_id"
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.parent_id }"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">
+                                        {{ eventList.filter(item => item.value == event.parent_id).at(-1)?.name
+                                            ||
+                                            "Parent event"
+                                        }}
+                                    </span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Parent event</h1>
+                                        <div
+                                            class="min-w-[250px] md:min-w-[450px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+
+                                            <USelect class="flex-1" v-model="payload.parent_id"
+                                                placeholder="Parent Category" :options="eventList"
+                                                option-attribute="name" color="blue" />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.parentEvent = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click=" popovers.parentEvent = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
 
                     <tr>
                         <th class="th">ID</th>
@@ -398,7 +515,12 @@ const updateCourse = async (callback) => {
 
                     <tr>
                         <th class="th">Creation Date</th>
-                        <td class="td">{{ dayjs(event.created_at).format('DD-MM-YYYY HH:mm') }}</td>
+                        <td class="td">{{ dayjs(event.creation_time).format('DD-MM-YYYY HH:mm') }}</td>
+                    </tr>
+
+                    <tr>
+                        <th class="th">Created by</th>
+                        <td class="td">{{ event.user?.name }}</td>
                     </tr>
 
                 </table>
@@ -406,12 +528,49 @@ const updateCourse = async (callback) => {
 
 
                 <!-- Seminar content and goals -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Seminar content & Goals</h6>
+                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Event Details</h6>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <div class="h-48 flex items-center justify-center">
-                    <h5 class="text-teal-400 text-xl font-semibold capitalize">Comming Soon</h5>
-                </div>
+                <table class="w-full mb-8">
+                    <tr>
+                        <th class="th">Organizer</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.organizer" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.organizer = event.organizer"
+                                        :class="{ 'text-gray-400 border-b border-dotted italic': !event.organizer }"
+                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            event.organizer || 'Organizer'
+                                        }}</span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Organizer</h1>
+                                        <div
+                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                            <UInput class="flex-1" color="blue" v-model="payload.organizer"
+                                                type="search" />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateEvent(function () {
+                                                    popovers.organizer = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click="popovers.organizer = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
+                 
+
+                </table>
 
 
 

@@ -6,7 +6,7 @@ const props = defineProps({
     categories: Object,
 })
 
-const emit = defineEmits(["update:modelValue"])
+const emit = defineEmits(["update:modelValue", "saved"])
 
 const loading = ref(false);
 
@@ -36,9 +36,6 @@ const schema = z.object({
 
 
 const initialState = {
-    course_id: useRoute().params.id,
-    calendar_event_id: 1,
-    is_main_event:true,
     title: undefined,
     calendar_categories_id: undefined,
     start_time: undefined,
@@ -66,7 +63,15 @@ const save = async () => {
 
         const { $axios } = useNuxtApp();
 
-        const response = await $axios.post('/course-events', state.value);
+        const response = await $axios.post('/calendar-events', state.value);
+
+        const mappingResponse = await $axios.post('/course-events', {
+            course_id: useRoute().params.id,
+            calendar_event_id: response.data.data.id,
+            is_main_event: false,
+        });
+
+        emit("saved");
 
         resetForm();
 

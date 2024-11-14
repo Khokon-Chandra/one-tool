@@ -103,7 +103,7 @@ const links = [{
                     </div>
                 </header>
                 <section
-                    class="p-6 w-full bg-blue-400/5 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
+                    class="p-4 w-full bg-blue-400/5 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
                     <slot />
                 </section>
             </div>
