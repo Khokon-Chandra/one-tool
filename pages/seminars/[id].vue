@@ -1,50 +1,56 @@
 <script setup>
 import dayjs from 'dayjs';
 
+// Page Meta & Layout
 definePageMeta({
-    middleware: "auth",
-    layout: "auth",
+    middleware: 'auth',
+    layout: 'auth'
 });
 
-/**
- * Popover constants
- */
-const openTitle = ref(false)
-const openSubtitle = ref(false)
-const openShorthandSymbol = ref(false);
-const openCategory = ref(false);
-const openCourse = ref(false);
-const openContent = ref(false);
-const openGoals = ref(false);
-const openTeaser = ref(false);
-const openTargetGroup = ref(false);
-
-
+// Nuxt 3 App-level injections
 const { $axios, $cookies } = useNuxtApp();
-
 const toast = useToast();
+const route = useRoute();
 
-const course = ref(null);
-
-const categories = ref([]);
-
-const courseList = ref([]);
-
-const loading = ref(true);
-
-const updateLoading = ref(false);
-
-const page = ref(1);
-
-const courseId = useRoute().params.id
+// UI State Constants
+const popovers = reactive({
+    title: false,
+    subtitle: false,
+    shorthandSymbol: false,
+    category: false,
+    course: false,
+    content: false,
+    goals: false,
+    teaser: false,
+    targetGroup: false,
+    note: false,
+    cost: false,
+});
 
 const isOpenEventModal = ref(false);
+const loading = ref(true);
+const updateLoading = ref(false);
 
+// Course and Category Data
+const courseId = route.params.id;
+const course = ref(null);
+const categories = ref([]);
+const CalendarCagegories = ref([]);
+const courseList = ref([]);
 
+// Links for Breadcrumbs or Navigation
+const links = reactive([
+    { label: 'Dashboard', icon: 'i-heroicons-chart-pie', to: '/' },
+    { label: 'Seminars', icon: 'i-heroicons-academic-cap', to: '/seminars' },
+    { label: 'Details', labelClass: 'text-teal-600', icon: 'i-heroicons-link', iconClass: 'text-teal-600' }
+]);
+
+// Course Form Payload
 const payload = reactive({
     id: '',
     title: '',
     subtitle: '',
+    course_category_id: '',
     is_overnight_stay_available: '',
     created_by: '',
     updated_by: 0,
@@ -56,117 +62,108 @@ const payload = reactive({
     target_group: '',
     cost_information: '',
     notes: '',
-    cost_information: '',
 });
 
+// Computed Properties
+const selectedCategory = computed(() => {
+    const category = categories.value.find(item => item.value === course.value?.course_category_id);
+    return category ? category.label : null;
+});
 
-const links = reactive([{
-    label: 'Dashboard',
-    icon: 'i-heroicons-chart-pie',
-    to: '/'
-}, {
-    label: 'Seminars',
-    icon: 'i-heroicons-academic-cap',
-    to: '/seminars'
-}, {
-    label: 'Details',
-    labelClass: 'text-teal-600',
-    icon: 'i-heroicons-link',
-    iconClass: 'text-teal-600'
-}]);
+const parentCourseName = computed(() => {
+    const parentCourse = courseList.value.find(item => item.id === course.value?.parent_id);
+    return parentCourse ? parentCourse.title : null;
+});
+
+// Fetch Data Functions
+const fetchCourses = async () => {
+    const response = await $axios.get('/courses');
+    courseList.value = response.data.data;
+};
+
+const fetchCourseDetails = async () => {
+    const courseResponse = await $axios.get(`/courses/${courseId}?include=events`);
+    course.value = courseResponse.data.data;
+    populatePayload(course.value);
+    links[2].label = course.value.title;
+};
+
+const fetchCategories = async () => {
+    const categoriesResponse = await $axios.get('/course-categories');
+    categories.value = categoriesResponse.data.data.map(item => ({
+        label: item.name,
+        value: item.id,
+    }));
+};
 
 
+const fetchCalendarCategories = () => {
+
+    $axios.get('/calendar-categories?per_page=100')
+        .then(response => {
+            CalendarCagegories.value = response.data.data.map(item => ({
+                label: item.name,
+                value: item.id,
+            }))
+        })
+};
+
+
+const populatePayload = (courseData) => {
+    Object.assign(payload, {
+        id: courseData.id,
+        title: courseData.title,
+        subtitle: courseData.subtitle,
+        number: courseData.number,
+        course_category_id: courseData.course_category_id,
+        parent_id: courseData.parent_id,
+        is_overnight_stay_available: courseData.is_overnight_stay_available,
+        created_by: courseData.created_by,
+        updated_by: $cookies.get('auth_user_id') || 0,
+        max_number: courseData.max_number,
+        has_single_event: courseData.has_single_event,
+        contents: courseData.contents,
+        goals: courseData.goals,
+        teaser: courseData.teaser,
+        target_group: courseData.target_group,
+        cost_information: courseData.cost_information,
+        notes: courseData.notes,
+    });
+};
+
+// Lifecycle Hooks
 onMounted(async () => {
     try {
 
-        $axios.get('/courses')
-            .then(response => {
-                courseList.value = response.data.data;
-            })
+        loading.value = true;
 
-        const courseListResponse = await $axios.get("/courses/" + courseId + "?include=events");
-        const categoriesResponse = await $axios.get('/course-categories');
+        await Promise.all([fetchCourses(), fetchCourseDetails(), fetchCategories()]);
 
-        course.value = courseListResponse.data.data;
+        fetchCalendarCategories();
 
-        categories.value = categoriesResponse.data.data.map((item) => {
-            return { label: item.name, value: item.id }
-        });
-
-        loading.value = false;
-
-        links[2].label = course.value.title;
-
-        /**
-         * Update course form attribute
-         */
-        payload.id = course.value.id;
-        payload.title = course.value.title;
-        payload.subtitle = course.value.subtitle;
-        payload.is_overnight_stay_available = course.value.is_overnight_stay_available;
-        payload.created_by = course.value.created_by;
-        payload.max_number = course.value.max_number;
-        payload.has_single_event = course.value.has_single_event;
-        payload.updated_by = $cookies.get('auth_user_id') || 0;
-        payload.has_single_event = course.value.has_single_event;
 
     } catch (error) {
-
+        console.error('Error loading data:', error);
+    } finally {
         loading.value = false;
     }
 });
 
-const selectedCategory = computed(() => {
-    if (!course.value.course_category_id) {
-        return false
-    }
-    return categories.value.filter((item) => {
-        return item.value == course.value.course_category_id
-    }).at(-1).label;
-
-});
-
-
-const parentCourseName = computed(() => {
-    if (!course.value.parent_id) {
-        return false
-    }
-    return courseList.value.filter((item) => {
-        return item.id == course.value.parent_id
-    }).at(-1).title;
-
-});
-
-
+// Update Course Function
 const updateCourse = async (callback) => {
-
     try {
-
         updateLoading.value = true;
-
-        const response = await $axios.put('/courses/' + course.value.id, payload);
-
-        const data = response.data.data;
-
-        data["events"] = course.value.events;
-
-        course.value = data;
-
+        const response = await $axios.put(`/courses/${course.value.id}`, payload);
+        course.value = { ...response.data.data, events: course.value.events };
         links[2].label = course.value.title;
-
-        updateLoading.value = false;
-
-        setTimeout(() => {
-            callback();
-        }, 1000);
-
+        toast.add({ title: 'Course updated successfully' });
+        callback?.();
     } catch (error) {
+        toast.add({ title: `Update failed: ${error.message}` })
+    } finally {
         updateLoading.value = false;
-        useToast().add({
-            title: error.message
-        })
     }
-}
+};
 
 
 </script>
@@ -180,11 +177,11 @@ const updateCourse = async (callback) => {
             </template>
         </UBreadcrumb>
 
-        <create-event v-model="isOpenEventModal" :categories="categories" />
+        <create-event v-model="isOpenEventModal" :categories="CalendarCagegories" />
 
         <TableSkeleton v-if="loading == true" />
 
-        <div v-if="course" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div v-if="course" class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
             <UCard v-if="course" class="w-full bg-white dark:bg-gray-800">
                 <h4 class="text-sm font-medium text-teal-600 mb-2 uppercase">Course</h4>
                 <hr class="w-full dark:border-gray-700/90">
@@ -196,11 +193,12 @@ const updateCourse = async (callback) => {
                 <hr class="w-full dark:border-gray-700/90">
 
                 <table class="w-full mb-8">
+
                     <tr>
                         <th class="th">Title</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openTitle" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.title" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.title = course.title"
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
                                             course.title
@@ -216,10 +214,10 @@ const updateCourse = async (callback) => {
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openTitle = false
+                                                    popovers.title = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openTitle = false"
+                                            <UButton class="rounded-sm" @click="popovers.title = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -229,16 +227,16 @@ const updateCourse = async (callback) => {
                             </div>
                         </td>
                     </tr>
+
                     <tr>
                         <th class="th">Subtitle</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openSubtitle" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.subtitle = course.subtitle"
-                                        :class="{
-                                            'text-gray-400': !course.subtitle
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            course.subtitle || 'Subtitle'
+                                <UPopover v-model:open="popovers.subtitle" :popper="{ arrow: true }">
+                                    <span @click="payload.subtitle = course.subtitle" variant="none" :class="{
+                                        'text-gray-400': !course.subtitle
+                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                        course.subtitle || 'Subtitle'
                                         }}</span>
 
                                     <template #panel>
@@ -250,10 +248,10 @@ const updateCourse = async (callback) => {
                                                 type="search" />
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openSubtitle = false
+                                                    popovers.subtitle = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openSubtitle = false"
+                                            <UButton class="rounded-sm" @click="popovers.subtitle = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -268,12 +266,14 @@ const updateCourse = async (callback) => {
                         <th class="th">Shorthand symbol</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openShorthandSymbol" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.number = course.number" :class="{
+                                <UPopover v-model:open="popovers.shorthandSymbol" :popper="{ arrow: true }"
+                                    @click="payload.number = course.number">
+
+                                    <span color="white" variant="none" :class="{
                                         'text-gray-400': !course.number
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.number || 'Shorthand symbol'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -285,10 +285,10 @@ const updateCourse = async (callback) => {
                                                 type="search" />
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openShorthandSymbol = false
+                                                    popovers.shorthandSymbol = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openShorthandSymbol = false"
+                                            <UButton class="rounded-sm" @click="popovers.shorthandSymbol = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -308,12 +308,11 @@ const updateCourse = async (callback) => {
                         <th class="th">Course Category</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openCategory" :popper="{ arrow: true }">
-                                    <span color="white" variant="none"
-                                        @click="payload.course_category_id = course.course_category_id" :class="{
-                                            'text-gray-400': !course.course_category_id
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            selectedCategory || 'course category'
+                                <UPopover v-model:open="popovers.category" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" :class="{
+                                        'text-gray-400': !course.course_category_id
+                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                        selectedCategory || 'course category'
                                         }}</span>
 
                                     <template #panel>
@@ -332,11 +331,11 @@ const updateCourse = async (callback) => {
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openCategory = false
+                                                    popovers.category = false
                                                 })" :loading="updateLoading" />
 
 
-                                            <UButton class="rounded-sm" @click="openCategory = false"
+                                            <UButton class="rounded-sm" @click="popovers.category = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -356,12 +355,11 @@ const updateCourse = async (callback) => {
                         <th class="th">Parent Course</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openCourse" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.parent_id = course.parent_id"
-                                        :class="{
-                                            'text-gray-400': !course.parent_id
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                            parentCourseName || 'Parent course'
+                                <UPopover v-model:open="popovers.course" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" :class="{
+                                        'text-gray-400': !course.parent_id
+                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                        parentCourseName || 'Parent course'
                                         }}</span>
 
                                     <template #panel>
@@ -380,11 +378,11 @@ const updateCourse = async (callback) => {
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openCourse = false
+                                                    popovers.course = false
                                                 })" :loading="updateLoading" />
 
 
-                                            <UButton class="rounded-sm" @click="openCourse = false"
+                                            <UButton class="rounded-sm" @click="popovers.course = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -430,8 +428,8 @@ const updateCourse = async (callback) => {
                         <th class="th">Seminar contents</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openContent" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.contents = course.contents"
+                                <UPopover v-model:open="popovers.content" :popper="{ arrow: true }">
+                                    <span color="white" variant="none"
                                         class="inline cursor-pointer font-semibold text-wrap">
                                         <span v-html="course.contents"></span>
                                         <span v-if="!course.contents" class="text-gray-400  hover:text-blue-500">Seminar
@@ -450,10 +448,10 @@ const updateCourse = async (callback) => {
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openContent = false
+                                                    popovers.content = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openContent = false"
+                                            <UButton class="rounded-sm" @click="popovers.content = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -467,12 +465,12 @@ const updateCourse = async (callback) => {
                         <th class="th">Goals</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openGoals" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.goals" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.goals = course.goals" :class="{
                                         'text-gray-400': !course.goals
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.goals || 'Goals'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -482,10 +480,10 @@ const updateCourse = async (callback) => {
                                             <UInput class="flex-1" color="blue" v-model="payload.goals" type="search" />
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openGoals = false
+                                                    popovers.goals = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openGoals = false"
+                                            <UButton class="rounded-sm" @click="popovers.goals = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -500,12 +498,12 @@ const updateCourse = async (callback) => {
                         <th class="th">Teaser</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openTeaser" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.teaser" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.teaser = course.teaser" :class="{
                                         'text-gray-400': !course.teaser
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.teaser || 'Teaser'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -517,10 +515,10 @@ const updateCourse = async (callback) => {
                                                 type="search" />
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openTeaser = false
+                                                    popovers.teaser = false
                                                 })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="openTeaser = false"
+                                            <UButton class="rounded-sm" @click="popovers.teaser = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>
@@ -535,7 +533,7 @@ const updateCourse = async (callback) => {
                         <th class="th">Target group</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="openTargetGroup" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.targetGroup" :popper="{ arrow: true }">
                                     <span color="white" variant="none"
                                         @click="payload.target_group = course.target_group" :class="{
                                             'text-gray-400': !course.target_group
@@ -556,11 +554,94 @@ const updateCourse = async (callback) => {
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
                                                 square variant="solid" @click="updateCourse(function () {
-                                                    openTargetGroup = false
+                                                    popovers.targetGroup = false
                                                 })" :loading="updateLoading" />
 
 
-                                            <UButton class="rounded-sm" @click="openTargetGroup = false"
+                                            <UButton class="rounded-sm" @click="popovers.targetGroup = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+
+                </table>
+
+
+
+
+                <!-- Notes and Cost -->
+                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Notes</h6>
+                <hr class="w-full dark:border-gray-700/90">
+
+                <table class="w-full mb-8">
+                    <tr>
+                        <th class="th">Notes</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.note" :popper="{ arrow: true }">
+                                    <span color="white" variant="none" @click="payload.notes = course.notes"
+                                        class="inline cursor-pointer font-semibold text-wrap">
+                                        <span v-html="course.notes"></span>
+                                        <span v-if="!course.notes"
+                                            class="text-gray-400  hover:text-blue-500">Notes</span>
+                                    </span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Note
+                                        </h1>
+                                        <div
+                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+
+                                            <UInput class="flex-1" color="blue" v-model="payload.notes" />
+
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateCourse(function () {
+                                                    popovers.note = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click="popovers.note = false"
+                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                variant="solid" />
+                                        </div>
+                                    </template>
+
+                                </UPopover>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="th">Cost Information</th>
+                        <td class="td">
+                            <div class="inline-block">
+                                <UPopover v-model:open="popovers.cost" :popper="{ arrow: true }">
+
+                                    <span color="white" variant="none"
+                                        @click="payload.cost_information = course.cost_information" :class="{
+                                            'text-gray-400': !course.cost_information
+                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                            course.cost_information || 'Cost Information'
+                                        }}</span>
+
+                                    <template #panel>
+                                        <h1
+                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                            Cost Information</h1>
+                                        <div class="min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                            <UInput class="flex-1" color="blue" v-model="payload.cost_information"
+                                                type="search" />
+                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
+                                                square variant="solid" @click="updateCourse(function () {
+                                                    popovers.cost = false
+                                                })" :loading="updateLoading" />
+
+                                            <UButton class="rounded-sm" @click="popovers.cost = false"
                                                 icon="i-heroicons-x-mark" size="sm" color="gray" square
                                                 variant="solid" />
                                         </div>

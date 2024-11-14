@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { content } from '#tailwind-config';
+
 
 const isOpenSlideOver = ref(false)
 
@@ -7,20 +9,31 @@ const links = [{
     label: 'Dashboard',
     to: '/',
     icon: 'i-heroicons-chart-pie'
-}, {
+},
+
+{
+    label: 'Contact',
+    to: '/contacts',
+    icon: 'i-heroicons-user-plus'
+},
+
+{
+    label: 'Contact group',
+    to: '/contact-groups',
+    icon: 'i-heroicons-users'
+},
+
+{
     label: 'Seminars',
     to: '/seminars',
     icon: 'i-heroicons-academic-cap',
-}, {
+},
+{
     label: 'Calendar',
     to: '/calendars',
     icon: 'i-heroicons-calendar-20-solid'
 },
-{
-    label: 'Contact',
-    to: '/contacts',
-    icon: 'i-heroicons-user'
-}
+
 ]
 </script>
 
@@ -51,8 +64,8 @@ const links = [{
             style="width:250px">
 
             <div
-                class="h-[4rem] flex-shrink-0 flex items-center justify-center border-b border-gray-200 dark:border-gray-800 px-4 gap-x-4 min-w-0 !border-transparent">
-                <logo class="w-16" />
+                class="my-4 flex-shrink-0 flex items-center border-b border-gray-200 dark:border-gray-800 px-6 gap-x-4 min-w-0 !border-transparent">
+                <logo class="w-24" />
             </div>
 
             <div class="flex flex-col w-full flex-1 overflow-hidden px-4">
@@ -66,7 +79,7 @@ const links = [{
             <div class="flex-col items-stretch relative w-full flex-1 flex">
                 <!-- header -->
                 <header
-                    class="h-[4rem] flex-shrink-0 flex items-center border-b border-gray-200 dark:border-gray-800 px-4 gap-x-4 min-w-0 bg-white dark:bg-gray-800/95">
+                    class="h-[4rem] flex-shrink-0 flex items-center border-b border-gray-200 dark:border-gray-800 px-4 gap-x-4 min-w-0 bg-white dark:bg-gray-800/95 shadow-sm">
                     <div class="flex items-center justify-between flex-1 gap-x-1.5 min-w-0">
 
                         <div class="flex gap-3 items-center">
@@ -78,7 +91,7 @@ const links = [{
                         <div class="flex justify-end items-center gap-4 flex-1">
                             <div class="max-w-xl flex-1">
                                 <UInput class="w-full" icon="i-heroicons-magnifying-glass-20-solid" size="sm"
-                                    color="Slate" :trailing="false" placeholder="Search..." />
+                                    color="gray" :trailing="false" placeholder="Search..." />
                             </div>
                             <div>
                                 <UIcon class="text-xl cursor-pointer" name="i-heroicons-bell" />
@@ -89,10 +102,10 @@ const links = [{
                         </div>
                     </div>
                 </header>
-                <div
+                <section
                     class="p-6 w-full bg-blue-400/5 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
                     <slot />
-                </div>
+                </section>
             </div>
         </main>
 

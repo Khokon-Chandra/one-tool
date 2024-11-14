@@ -10,6 +10,6 @@ export default defineNuxtConfig({
       apiBase: process.env.NODE_ENV === 'development' ? process.env.DEV_API_URL : process.env.PROD_API_URL,
       prodBase: process.env.PROD_API_URL
     }
-  }
+  } 
 
 })

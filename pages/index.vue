@@ -27,7 +27,7 @@ const logout = () => {
             </template>
         </UBreadcrumb>
 
-        <UCard class="text-center">Welcome to 1Tool application!!</UCard>
+        <UCard class="text-center bg-teal-500/10 dark:bg-teal-500/10">Welcome to 1Tool application!!</UCard>
 
         <div class="flex gap-4 justify-between items-center">
             <UCard class="w-full bg-white dark:bg-gray-800">
