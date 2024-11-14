@@ -358,7 +358,7 @@ const updateEvent = async (callback) => {
                                         <div
                                             class="min-w-[250px] md:min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
-                                            <UInput type="date" class="flex-1" color="blue"
+                                            <UInput type="text" class="flex-1" color="blue"
                                                 v-model="payload.contact_id" />
 
                                             <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
