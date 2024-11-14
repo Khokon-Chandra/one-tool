@@ -344,7 +344,7 @@ const updateEvent = async (callback) => {
                         <th class="th">Contact persons</th>
                         <td class="td">
                             <div class="inline-block">
-                                <UPopover v-model:open="popovers.endDate" :popper="{ arrow: true }">
+                                <UPopover v-model:open="popovers.contactPerson" :popper="{ arrow: true }">
                                     <span color="white" variant="none" @click="payload.contact_id = event.contact_id"
                                         :class="{ 'text-gray-400 border-b border-dotted italic': !event.contact_id }"
                                         class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
