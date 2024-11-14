@@ -132,6 +132,7 @@ const populatePayload = (courseData) => {
         target_group: courseData.target_group,
         cost_information: courseData.cost_information,
         notes: courseData.notes,
+        created_by: courseData.created_by
     });
 };
 
