@@ -43,6 +43,12 @@ const logout = () => {
                         to
                         explore the exciting features we have in store!"
                     </p>
+
+                    <div class="text-center mt-4">
+                        <UButton class="px-6 text-sm font-semibold" size="lg" color="blue" label="Go to Seminar"
+                            @click="navigateTo('/seminars')" />
+                    </div>
+                    
                 </div>
             </UCard>
         </div>
