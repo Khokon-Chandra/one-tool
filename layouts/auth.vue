@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { content } from '#tailwind-config';
-
 
 const isOpenSlideOver = ref(false)
 
@@ -40,7 +38,7 @@ const links = [{
 <template>
     <div class="h-screen w-screen overflow-hidden fixed inset-0 flex">
 
-
+        <!-- SlideOver Menu -->
         <USlideover side="left" v-model="isOpenSlideOver">
             <div class="p-4 flex-1">
 
@@ -60,6 +58,8 @@ const links = [{
             </div>
         </USlideover>
 
+
+        <!-- Sidebar Navigation -->
         <nav class="flex-col items-stretch relative w-full border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 shadow-lg bg-gray-50 dark:bg-gray-900/90 lg:w-[262px] flex-shrink-0 hidden lg:flex"
             style="width:250px">
 
@@ -102,10 +102,24 @@ const links = [{
                         </div>
                     </div>
                 </header>
+
+                <!-- Page Content (Slot) -->
                 <section
                     class="p-4 w-full bg-blue-400/5 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
                     <slot />
                 </section>
+
+
+                <!-- Footer Slot -->
+                <footer v-if="$slots.footer"
+                    class="min-h-[4rem] flex-shrink-0 flex items-center border-t border-gray-200 dark:border-gray-800 px-4 gap-x-4 min-w-0 bg-white/20 dark:bg-gray-800/95">
+
+                    <slot name="footer">
+                        <p class="text-sm font-normal text-gray-600 dark:text-gray-400 text-center w-full">footer
+                            content goes
+                            here</p>
+                    </slot>
+                </footer>
             </div>
         </main>
 
