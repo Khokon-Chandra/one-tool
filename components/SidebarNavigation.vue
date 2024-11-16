@@ -205,7 +205,7 @@ const toggleCollapse = (index) => {
 
 
         <div class="flex items-center justify-center min-h-[3rem]">
-            <button class="cursor-pointer px-4 py-2 bg-gray-200 rounded-lg" @click="toggleSidebar">
+            <button class="cursor-pointer px-4 py-2 bg-gray-200 rounded-lg dark:bg-gray-800 dark:text-gray-300" @click="toggleSidebar">
                 <UIcon v-if="isMenuOpen == true" name="i-heroicons-chevron-double-left" />
                 <UIcon v-if="isMenuOpen == false" name="i-heroicons-chevron-double-right" />
             </button>
