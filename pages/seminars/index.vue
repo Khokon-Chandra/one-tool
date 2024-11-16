@@ -21,6 +21,8 @@ const loading = ref(true);
 
 const isOpenColumn = ref(false);
 
+const isOpenNewCourseModal = ref(false);
+
 const showEvent = ref(null);
 
 const selectedItems = ref([])
@@ -83,23 +85,23 @@ const editLinks = [
     ]
 ]
 
-const columns = useLocalStorage('columns', reactive([
-    { label: 'title', status: true },
-    { label: 'subtitle', status: true },
-    { label: 'events', status: true },
-    { label: 'abbreviation', status: false },
-    { label: 'seminar category', status: false },
-    { label: 'location', status: false },
-    { label: 'next event', status: false },
-    { label: 'start date', status: true },
-    { label: 'end date', status: true },
-    { label: 'participant', status: true },
-    { label: 'participants next event', status: false },
-    { label: 'waiting list participants next event', status: false },
-    { label: 'waiting list', status: false },
-    { label: 'last modified from-to', status: false },
-    { label: 'status', status: false },
-    { label: 'active', status: true },
+const columns = useLocalStorage('course_columns', reactive([
+    { label: 'title', key: 'title', status: true },
+    { label: 'subtitle', key: 'subtitle', status: true },
+    { label: 'events', key: 'events', status: true },
+    { label: 'Shorthand symbol', key: 'number', status: false },
+    { label: 'seminar category', key: 'course_category_id', status: false },
+    { label: 'location', key: 'location', status: false },
+    { label: 'next event', key: 'shift_event_id', status: false },
+    { label: 'start date', key: 'start_time', status: true },
+    { label: 'end date', key: 'end_time', status: true },
+    { label: 'participant', key: '', status: true },
+    { label: 'participants next event', key: '', status: false },
+    { label: 'waiting list participants next event', key: '', status: false },
+    { label: 'waiting list', key: '', status: false },
+    { label: 'last modified from-to', key: '', status: false },
+    { label: 'status', key: '', status: false },
+    { label: 'active', key: '', status: true },
 ]));
 
 const fetchCourses = async () => {
@@ -161,6 +163,8 @@ function toggleSelectAll() {
 
                 <CourseColumnModal v-model="isOpenColumn" :options="columns" />
 
+                <CreateCourseModal v-model="isOpenNewCourseModal" />
+
                 <UBreadcrumb :links="links" :ui="{ ol: 'gap-x-3', li: 'gap-x-3' }">
                     <template #divider>
                         <span class="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
@@ -203,7 +207,7 @@ function toggleSelectAll() {
 
                         <UButton @click="isOpenColumn = true" color="gray">Columns</UButton>
 
-                        <UButton color="blue" variant="solid">New Course</UButton>
+                        <UButton @click="isOpenNewCourseModal = true" color="blue" variant="solid">New Course</UButton>
                     </div>
                 </div>
 
@@ -295,7 +299,7 @@ function toggleSelectAll() {
                                                         <nuxt-link :to="'/events/' + event.id">
                                                             <span class="text-xs font-medium text-blue-500">{{
                                                                 event.title
-                                                                }}</span>
+                                                            }}</span>
                                                         </nuxt-link>
                                                     </td>
                                                     <td class="td">{{ event.city }}</td>
