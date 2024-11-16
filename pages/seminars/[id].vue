@@ -260,7 +260,7 @@ const updateCourse = async (callback) => {
                                                 'text-gray-400': !course.subtitle
                                             }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                                 course.subtitle || 'Subtitle'
-                                                }}</span>
+                                            }}</span>
 
                                             <template #panel>
                                                 <h1
@@ -297,7 +297,7 @@ const updateCourse = async (callback) => {
                                                 'text-gray-400': !course.number
                                             }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                                 course.number || 'Shorthand symbol'
-                                                }}</span>
+                                            }}</span>
 
                                             <template #panel>
                                                 <h1
@@ -339,7 +339,7 @@ const updateCourse = async (callback) => {
                                                 'text-gray-400': !course.course_category_id
                                             }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                                 selectedCategory || 'course category'
-                                                }}</span>
+                                            }}</span>
 
                                             <template #panel>
                                                 <h1
@@ -811,9 +811,9 @@ const updateCourse = async (callback) => {
                                     </td>
                                     <td class="event-td">
                                         <UIcon class="text-lg text-primary-500" v-if="event.is_all_day == 1"
-                                            name="i-heroicons-check-circle" />
+                                            name="i-heroicons-check-circle-solid" />
                                         <UIcon class="text-lg text-red-500" v-if="event.is_all_day == 0"
-                                            name="i-heroicons-x-circle" />
+                                            name="i-heroicons-x-circle-solid" />
                                     </td>
                                 </tr>
                             </tbody>

@@ -87,11 +87,11 @@ const links = [{
                         <div class="flex gap-3 items-center">
                             <UIcon @click="isOpenSlideOver = true" class="flex lg:hidden text-2xl cursor-pointer"
                                 name="i-heroicons-bars-3" />
-                            <USelect color="blue" :options="['Jhone Abraham', 'Prime', 'Auth']" />
+                            <USelect color="blue" :options="['Jhone Abraham', 'Prime', 'Auth']" value="Jhone Abraham" />
                         </div>
 
                         <div class="flex justify-end items-center gap-4 flex-1">
-                            <div class="max-w-lg flex-1">
+                            <div class="max-w-lg hidden md:flex flex-1">
                                 <UInput type="search" class="w-full" icon="i-heroicons-magnifying-glass-20-solid"
                                     size="sm" color="gray" :trailing="false" placeholder="Search..." />
                             </div>
