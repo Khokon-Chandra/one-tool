@@ -11,6 +11,7 @@ useHead({
     titleTemplate: '%s - Seminars-Details'
 })
 
+
 // Nuxt 3 App-level injections
 const { $axios, $cookies } = useNuxtApp();
 const toast = useToast();
@@ -147,7 +148,7 @@ onMounted(async () => {
         fetchCalendarCategories();
 
     } catch (error) {
-        toast.add({ title: error.message });
+        toast.add({ title: error.message, color: 'red' });
     } finally {
         loading.value = false;
     }
@@ -161,10 +162,10 @@ const updateCourse = async (callback) => {
         const response = await $axios.put(`/courses/${course.value.id}`, payload);
         course.value = { ...response.data.data, events: course.value.events };
         links[2].label = course.value.title;
-        toast.add({ title: 'Course updated successfully' });
+        toast.add({ title: 'Course updated successfully', icon: 'i-heroicons-check-circle' });
         callback?.();
     } catch (error) {
-        toast.add({ title: `Update failed: ${error.message}` })
+        toast.add({ title: `Update failed: ${error.message}`, color: 'red' })
     } finally {
         updateLoading.value = false;
     }
@@ -242,7 +243,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.subtitle
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.subtitle || 'Subtitle'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -278,7 +279,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.number
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.number || 'Shorthand symbol'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -318,7 +319,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.course_category_id
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         selectedCategory || 'course category'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -365,7 +366,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.parent_id
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
                                         parentCourseName || 'Parent course'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -475,7 +476,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.goals
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.goals || 'Goals'
-                                    }}</span>
+                                        }}</span>
 
                                     <template #panel>
                                         <h1
@@ -508,7 +509,7 @@ const updateCourse = async (callback) => {
                                         'text-gray-400': !course.teaser
                                     }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
                                         course.teaser || 'Teaser'
-                                        }}</span>
+                                    }}</span>
 
                                     <template #panel>
                                         <h1
@@ -714,9 +715,10 @@ const updateCourse = async (callback) => {
                                 <td class="event-td min-w-[6rem]">{{ dayjs(event.end_time).format('DD-MM-YYYY HH:mm') }}
                                 </td>
                                 <td class="event-td">
-                                    <UIcon class="text-lg text-primary-500" v-if="event.is_all_day"
+                                    <UIcon class="text-lg text-primary-500" v-if="event.is_all_day == 1"
                                         name="i-heroicons-check-circle" />
-                                    <UIcon class="text-lg text-red-500" else name="i-heroicons-x-circle" />
+                                    <UIcon class="text-lg text-red-500" v-if="event.is_all_day == 0"
+                                        name="i-heroicons-x-circle" />
                                 </td>
                             </tr>
                         </tbody>

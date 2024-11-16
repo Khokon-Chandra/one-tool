@@ -56,7 +56,7 @@ const validatePassword = () => {
 const handleLogin = async () => {
 
     validateEmail();
-    
+
     validatePassword();
 
     if (emailError.value || passwordError.value) return false;
@@ -71,6 +71,8 @@ const handleLogin = async () => {
         $cookies.set('tenant_identifier', response.data.tenant_identifier);
 
         loading.value = false;
+
+        useToast().add({ title: "Login successful! Welcome back." })
 
         navigateTo('/');
 
