@@ -17,11 +17,8 @@ useSeoMeta({
 
 </script>
 <template>
-  <NuxtLayout>
-
+  <div>
     <UNotifications />
-
     <NuxtPage />
-
-  </NuxtLayout>
+  </div>
 </template>
