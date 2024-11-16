@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 definePageMeta({
     middleware: "auth",
-    layout: "auth",
+    layout:'auth'
 });
 
 useHead({

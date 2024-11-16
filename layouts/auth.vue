@@ -21,7 +21,19 @@ const links = [{
 {
     label: 'Contact group',
     to: '/contact-groups',
-    icon: 'i-heroicons-users'
+    icon: 'i-heroicons-users',
+    children: [
+        {
+            label: 'Contact',
+            to: '/contacts',
+            icon: 'i-heroicons-user-plus'
+        },
+        {
+            label: 'Contact',
+            to: '/contacts',
+            icon: 'i-heroicons-user-plus'
+        },
+    ]
 },
 
 {
@@ -42,7 +54,7 @@ const links = [{
     <div class="h-screen w-screen overflow-hidden fixed inset-0 flex">
 
         <!-- SlideOver Menu -->
-        <USlideover side="left" v-model="isOpenSlideOver">
+        <!-- <USlideover side="left" v-model="isOpenSlideOver">
             <div class="p-4 flex-1">
 
                 <div class="flex justify-between items-center p-4">
@@ -59,24 +71,11 @@ const links = [{
                     <UVerticalNavigation :links="links" />
                 </div>
             </div>
-        </USlideover>
+        </USlideover> -->
 
 
         <!-- Sidebar Navigation -->
-        <nav class="flex-col items-stretch relative w-full border-b lg:border-b-0 lg:border-r border-gray-200 dark:border-gray-800 shadow-sm bg-gray-50 dark:bg-gray-900/90 lg:w-[262px] flex-shrink-0 hidden lg:flex"
-            style="width:250px">
-
-            <div
-                class="my-4 flex-shrink-0 flex items-center border-b border-gray-200 dark:border-gray-800 px-6 gap-x-4 min-w-0 !border-transparent">
-                <logo class="w-20" />
-            </div>
-
-            <div class="flex flex-col w-full flex-1 overflow-hidden px-4">
-
-                <UVerticalNavigation :links="links" />
-
-            </div>
-        </nav>
+        <SidebarNavigation />
 
         <main class="flex flex-1 w-full min-w-0">
             <div class="flex-col items-stretch relative w-full flex-1 flex">
@@ -113,7 +112,7 @@ const links = [{
 
                 <!-- Page Content (Slot) -->
                 <section
-                    class="p-4 w-full bg-blue-400/5 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
+                    class="p-4 w-full bg-gray-50 dark:bg-gray-900 h-full overflow-y-auto pb-16 scrollbar-light dark:scrollbar-dark">
                     <slot />
                 </section>
 
