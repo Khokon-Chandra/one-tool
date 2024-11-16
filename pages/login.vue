@@ -74,7 +74,7 @@ const handleLogin = async () => {
 
         useToast().add({ title: "Login successful! Welcome back." })
 
-        navigateTo('/');
+        navigateTo('/seminars');
 
     } catch (error) {
         loading.value = false;
