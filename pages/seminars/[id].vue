@@ -30,6 +30,7 @@ const popovers = reactive({
     targetGroup: false,
     note: false,
     cost: false,
+    eventNow: false,
 });
 
 const isOpenEventModal = ref(false);
@@ -42,6 +43,13 @@ const course = ref(null);
 const categories = ref([]);
 const CalendarCagegories = ref([]);
 const courseList = ref([]);
+
+const collapse = ref({
+    master: true,
+    content: true,
+    note: true,
+    placeholder: true,
+})
 
 // Links for Breadcrumbs or Navigation
 const links = reactive([
@@ -67,6 +75,7 @@ const payload = reactive({
     target_group: '',
     cost_information: '',
     notes: '',
+    event_now: '',
 });
 
 // Computed Properties
@@ -133,7 +142,8 @@ const populatePayload = (courseData) => {
         target_group: courseData.target_group,
         cost_information: courseData.cost_information,
         notes: courseData.notes,
-        created_by: courseData.created_by
+        created_by: courseData.created_by,
+        event_now: courseData.event_now
     });
 };
 
@@ -195,470 +205,536 @@ const updateCourse = async (callback) => {
 
 
                 <!-- Master data -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Master Data</h6>
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Master Data</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.master ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.master = !collapse.master" />
+                </div>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <table class="w-full mb-8">
+                <table v-show="collapse.master" class="w-full mb-8">
+                    <tbody>
+                        <tr>
+                            <th class="th">Title</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.title" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" @click="payload.title = course.title"
+                                            class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                                course.title
+                                            }}</span>
 
-                    <tr>
-                        <th class="th">Title</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.title" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.title = course.title"
-                                        class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                            course.title
-                                        }}</span>
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Title</h1>
+                                            <div
+                                                class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.title"
+                                                    type="search" />
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Title</h1>
-                                        <div
-                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.title" type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.title = false
+                                                    })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.title = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" @click="popovers.title = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                            <UButton class="rounded-sm" @click="popovers.title = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
+                        <tr>
+                            <th class="th">Subtitle</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.subtitle" :popper="{ arrow: true }">
+                                        <span @click="payload.subtitle = course.subtitle" variant="none" :class="{
+                                            'text-gray-400': !course.subtitle
+                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                            course.subtitle || 'Subtitle'
+                                            }}</span>
 
-                    <tr>
-                        <th class="th">Subtitle</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.subtitle" :popper="{ arrow: true }">
-                                    <span @click="payload.subtitle = course.subtitle" variant="none" :class="{
-                                        'text-gray-400': !course.subtitle
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        course.subtitle || 'Subtitle'
-                                        }}</span>
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Subtitle</h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.subtitle"
+                                                    type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.subtitle = false
+                                                    })" :loading="updateLoading" />
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Subtitle</h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.subtitle"
-                                                type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.subtitle = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" @click="popovers.subtitle = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                            <UButton class="rounded-sm" @click="popovers.subtitle = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
+                        <tr>
+                            <th class="th">Shorthand symbol</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.shorthandSymbol" :popper="{ arrow: true }"
+                                        @click="payload.number = course.number">
 
-                    <tr>
-                        <th class="th">Shorthand symbol</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.shorthandSymbol" :popper="{ arrow: true }"
-                                    @click="payload.number = course.number">
+                                        <span color="white" variant="none" :class="{
+                                            'text-gray-400': !course.number
+                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                            course.number || 'Shorthand symbol'
+                                            }}</span>
 
-                                    <span color="white" variant="none" :class="{
-                                        'text-gray-400': !course.number
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        course.number || 'Shorthand symbol'
-                                    }}</span>
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Shorthand Symbol
+                                            </h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.number"
+                                                    type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.shorthandSymbol = false
+                                                    })" :loading="updateLoading" />
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Shorthand Symbol
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.number"
-                                                type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.shorthandSymbol = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" @click="popovers.shorthandSymbol = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                            <UButton class="rounded-sm" @click="popovers.shorthandSymbol = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
+                        <tr>
+                            <th class="th">Seminar member</th>
+                            <td class="td">{{ course.max_number }}</td>
+                        </tr>
 
-                    <tr>
-                        <th class="th">Seminar member</th>
-                        <td class="td">{{ course.max_number }}</td>
-                    </tr>
+                        <tr>
+                            <th class="th">Course Category</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.category" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" :class="{
+                                            'text-gray-400': !course.course_category_id
+                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                            selectedCategory || 'course category'
+                                            }}</span>
 
-                    <tr>
-                        <th class="th">Course Category</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.category" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" :class="{
-                                        'text-gray-400': !course.course_category_id
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        selectedCategory || 'course category'
-                                        }}</span>
-
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Course Category
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <select
-                                                class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
-                                                v-model="payload.course_category_id">
-                                                <option v-for="category in categories" :key="category.value"
-                                                    :value="category.value">{{ category.label }}</option>
-                                            </select>
-
-
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.category = false
-                                                })" :loading="updateLoading" />
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Course Category
+                                            </h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <select
+                                                    class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
+                                                    v-model="payload.course_category_id">
+                                                    <option v-for="category in categories" :key="category.value"
+                                                        :value="category.value">{{ category.label }}</option>
+                                                </select>
 
 
-                                            <UButton class="rounded-sm" @click="popovers.category = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
-
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="py-4"></td>
-                        <td></td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Parent Course</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.course" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" :class="{
-                                        'text-gray-400': !course.parent_id
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
-                                        parentCourseName || 'Parent course'
-                                        }}</span>
-
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Parent Course
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <select
-                                                class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
-                                                v-model="payload.parent_id">
-                                                <option v-for="item in courseList" :key="item.id" :value="item.id">{{
-                                                    item.title }}</option>
-                                            </select>
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.category = false
+                                                    })" :loading="updateLoading" />
 
 
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.course = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" @click="popovers.category = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
+
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="py-4"></td>
+                            <td></td>
+                        </tr>
+
+                        <tr>
+                            <th class="th">Parent Course</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.course" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" :class="{
+                                            'text-gray-400': !course.parent_id
+                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold text-wrap">{{
+                                            parentCourseName || 'Parent course'
+                                            }}</span>
+
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Parent Course
+                                            </h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <select
+                                                    class="flex-1 px-2 py-1 border border-blue-500 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-transparent"
+                                                    v-model="payload.parent_id">
+                                                    <option v-for="item in courseList" :key="item.id" :value="item.id">
+                                                        {{
+                                                            item.title }}</option>
+                                                </select>
 
 
-                                            <UButton class="rounded-sm" @click="popovers.course = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.course = false
+                                                    })" :loading="updateLoading" />
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
 
-                    <tr>
-                        <th class="th">Course includes only one event</th>
-                        <td class="td">
-                            <UToggle color="blue" :model-value="payload.has_single_event" @click="(() => {
-                                payload.has_single_event = !payload.has_single_event;
-                                updateCourse(function () {
-                                    return;
-                                })
-                            })()" />
-                        </td>
-                    </tr>
+                                                <UButton class="rounded-sm" @click="popovers.course = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                    <tr>
-                        <th class="th">ID</th>
-                        <td class="td">{{ course.id }}</td>
-                    </tr>
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
 
-                    <tr>
-                        <th class="th">Creation Date</th>
-                        <td class="td">{{ dayjs(course.created_at).format('DD-MM-YYYY HH:mm') }}</td>
-                    </tr>
+                        <tr>
+                            <th class="th">Course includes only one event</th>
+                            <td class="td">
+                                <UToggle color="blue" :model-value="payload.has_single_event" @click="(() => {
+                                    payload.has_single_event = !payload.has_single_event;
+                                    updateCourse(function () {
+                                        return;
+                                    })
+                                })()" />
+                            </td>
+                        </tr>
 
+                        <tr>
+                            <th class="th">ID</th>
+                            <td class="td">{{ course.id }}</td>
+                        </tr>
+
+                        <tr>
+                            <th class="th">Creation Date</th>
+                            <td class="td">{{ dayjs(course.created_at).format('DD-MM-YYYY HH:mm') }}</td>
+                        </tr>
+                    </tbody>
                 </table>
 
 
 
                 <!-- Seminar content and goals -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Seminar content & Goals</h6>
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Seminar content & goals</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.content ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.content = !collapse.content" />
+                </div>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <table class="w-full mb-8">
-                    <tr>
-                        <th class="th">Seminar contents</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.content" :popper="{ arrow: true }">
-                                    <span color="white" variant="none"
-                                        class="inline cursor-pointer font-semibold text-wrap">
-                                        <span v-html="course.contents"></span>
-                                        <span v-if="!course.contents" class="text-gray-400  hover:text-blue-500">Seminar
-                                            Content</span>
-                                    </span>
+                <table v-show="collapse.content" class="w-full mb-8">
+                    <tbody>
+                        <tr>
+                            <th class="th">Seminar contents</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.content" :popper="{ arrow: true }">
+                                        <span color="white" variant="none"
+                                            class="inline cursor-pointer font-semibold text-wrap">
+                                            <span v-html="course.contents"></span>
+                                            <span v-if="!course.contents"
+                                                class="text-gray-400  hover:text-blue-500">Seminar
+                                                Content</span>
+                                        </span>
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Seminar contents
-                                        </h1>
-                                        <div
-                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Seminar contents
+                                            </h1>
+                                            <div
+                                                class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
-                                            <UInput class="flex-1" color="blue" v-model="payload.contents" />
+                                                <UInput class="flex-1" color="blue" v-model="payload.contents" />
 
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.content = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.content = false
+                                                    })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="popovers.content = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                                <UButton class="rounded-sm" @click="popovers.content = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="th">Goals</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.goals" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.goals = course.goals" :class="{
-                                        'text-gray-400': !course.goals
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        course.goals || 'Goals'
-                                        }}</span>
-
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Goals</h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.goals" type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.goals = false
-                                                })" :loading="updateLoading" />
-
-                                            <UButton class="rounded-sm" @click="popovers.goals = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
-
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Teaser</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.teaser" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.teaser = course.teaser" :class="{
-                                        'text-gray-400': !course.teaser
-                                    }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                        course.teaser || 'Teaser'
-                                    }}</span>
-
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Teaser
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.teaser"
-                                                type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.teaser = false
-                                                })" :loading="updateLoading" />
-
-                                            <UButton class="rounded-sm" @click="popovers.teaser = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
-
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <th class="th">Target group</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.targetGroup" :popper="{ arrow: true }">
-                                    <span color="white" variant="none"
-                                        @click="payload.target_group = course.target_group" :class="{
-                                            'text-gray-400': !course.target_group
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="th">Goals</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.goals" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" @click="payload.goals = course.goals" :class="{
+                                            'text-gray-400': !course.goals
                                         }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            course.target_group || 'Target group'
-                                        }}</span>
+                                            course.goals || 'Goals'
+                                            }}</span>
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Target group
-                                        </h1>
-                                        <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Goals</h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.goals"
+                                                    type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.goals = false
+                                                    })" :loading="updateLoading" />
+
+                                                <UButton class="rounded-sm" @click="popovers.goals = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
+
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th class="th">Teaser</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.teaser" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" @click="payload.teaser = course.teaser"
+                                            :class="{
+                                                'text-gray-400': !course.teaser
+                                            }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                                course.teaser || 'Teaser'
+                                            }}</span>
+
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Teaser
+                                            </h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.teaser"
+                                                    type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.teaser = false
+                                                    })" :loading="updateLoading" />
+
+                                                <UButton class="rounded-sm" @click="popovers.teaser = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
+
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th class="th">Target group</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.targetGroup" :popper="{ arrow: true }">
+                                        <span color="white" variant="none"
+                                            @click="payload.target_group = course.target_group" :class="{
+                                                'text-gray-400': !course.target_group
+                                            }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                                course.target_group || 'Target group'
+                                            }}</span>
+
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Target group
+                                            </h1>
+                                            <div class="min-w-[250px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
 
-                                            <UInput color="blue" v-model="payload.target_group" class="flex-1" />
+                                                <UInput color="blue" v-model="payload.target_group" class="flex-1" />
 
 
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.targetGroup = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.targetGroup = false
+                                                    })" :loading="updateLoading" />
 
 
-                                            <UButton class="rounded-sm" @click="popovers.targetGroup = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                                <UButton class="rounded-sm" @click="popovers.targetGroup = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
 
 
 
 
                 <!-- Notes and Cost -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Notes</h6>
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Note</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.note ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.note = !collapse.note" />
+                </div>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <table class="w-full mb-8">
-                    <tr>
-                        <th class="th">Notes</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.note" :popper="{ arrow: true }">
-                                    <span color="white" variant="none" @click="payload.notes = course.notes"
-                                        class="inline cursor-pointer font-semibold text-wrap">
-                                        <span v-html="course.notes"></span>
-                                        <span v-if="!course.notes"
-                                            class="text-gray-400  hover:text-blue-500">Notes</span>
-                                    </span>
+                <table v-show="collapse.note" class="w-full mb-8">
+                    <tbody>
+                        <tr>
+                            <th class="th">Notes</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.note" :popper="{ arrow: true }">
+                                        <span color="white" variant="none" @click="payload.notes = course.notes"
+                                            class="inline cursor-pointer font-semibold text-wrap">
+                                            <span v-html="course.notes"></span>
+                                            <span v-if="!course.notes"
+                                                class="text-gray-400  hover:text-blue-500">Notes</span>
+                                        </span>
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Note
-                                        </h1>
-                                        <div
-                                            class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Note
+                                            </h1>
+                                            <div
+                                                class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
 
-                                            <UInput class="flex-1" color="blue" v-model="payload.notes" />
+                                                <UInput class="flex-1" color="blue" v-model="payload.notes" />
 
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.note = false
-                                                })" :loading="updateLoading" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.note = false
+                                                    })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="popovers.note = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                                <UButton class="rounded-sm" @click="popovers.note = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th class="th">Cost Information</th>
-                        <td class="td">
-                            <div class="inline-block">
-                                <UPopover v-model:open="popovers.cost" :popper="{ arrow: true }">
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="th">Cost Information</th>
+                            <td class="td">
+                                <div class="inline-block">
+                                    <UPopover v-model:open="popovers.cost" :popper="{ arrow: true }">
 
-                                    <span color="white" variant="none"
-                                        @click="payload.cost_information = course.cost_information" :class="{
-                                            'text-gray-400': !course.cost_information
-                                        }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
-                                            course.cost_information || 'Cost Information'
-                                        }}</span>
+                                        <span color="white" variant="none"
+                                            @click="payload.cost_information = course.cost_information" :class="{
+                                                'text-gray-400': !course.cost_information
+                                            }" class="inline cursor-pointer hover:text-blue-500 font-semibold">{{
+                                                course.cost_information || 'Cost Information'
+                                            }}</span>
 
-                                    <template #panel>
-                                        <h1
-                                            class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
-                                            Cost Information</h1>
-                                        <div class="min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
-                                            <UInput class="flex-1" color="blue" v-model="payload.cost_information"
-                                                type="search" />
-                                            <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue"
-                                                square variant="solid" @click="updateCourse(function () {
-                                                    popovers.cost = false
-                                                })" :loading="updateLoading" />
+                                        <template #panel>
+                                            <h1
+                                                class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                                Cost Information</h1>
+                                            <div class="min-w-[350px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                                <UInput class="flex-1" color="blue" v-model="payload.cost_information"
+                                                    type="search" />
+                                                <UButton class="rounded-sm" icon="i-heroicons-check" size="sm"
+                                                    color="blue" square variant="solid" @click="updateCourse(function () {
+                                                        popovers.cost = false
+                                                    })" :loading="updateLoading" />
 
-                                            <UButton class="rounded-sm" @click="popovers.cost = false"
-                                                icon="i-heroicons-x-mark" size="sm" color="gray" square
-                                                variant="solid" />
-                                        </div>
-                                    </template>
+                                                <UButton class="rounded-sm" @click="popovers.cost = false"
+                                                    icon="i-heroicons-x-mark" size="sm" color="gray" square
+                                                    variant="solid" />
+                                            </div>
+                                        </template>
 
-                                </UPopover>
-                            </div>
-                        </td>
-                    </tr>
+                                    </UPopover>
+                                </div>
+                            </td>
+                        </tr>
+
+                    </tbody>
 
                 </table>
+
+
+
+                <!-- Placeholder -->
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Placeholders</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.placeholder ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.placeholder = !collapse.placeholder" />
+                </div>
+
+                <div v-show="collapse.placeholder" class="p-2">
+                    <h1 class="th">Event now</h1>
+                    <div class="inline-block">
+                        <UPopover v-model:open="popovers.eventNow" :popper="{ arrow: true }">
+                            <span color="white" variant="none" @click="payload.event_now = course.event_now"
+                                :class="{
+                                    'text-gray-500 border-b-1 border-b-dotted-blue-500 italic' : !course.event_now
+                                }"
+                                class="pl-4 inline cursor-pointer text-sm hover:text-blue-500 font-semibold text-wrap" v-html="course.event_now || 'event now'"></span>
+
+                            <template #panel>
+                                <h1
+                                    class="font-meduim text-gray-600 dark:text-gray-300 p-2 border-b border-b-gray-200 dark:border-b-gray-700/90">
+                                    Event now</h1>
+                                <div
+                                    class="min-w-[350px] md:min-w-[550px] p-4 bg-gray-50 dark:bg-gray-900/90 flex gap-1">
+                                    <UTextarea class="flex-1" color="blue" v-model="payload.event_now" type="search" />
+
+                                    <UButton class="rounded-sm" icon="i-heroicons-check" size="sm" color="blue" square
+                                        variant="solid" @click="updateCourse(function () {
+                                            popovers.eventNow = false
+                                        })" :loading="updateLoading" />
+
+                                    <UButton class="rounded-sm" @click="popovers.eventNow = false"
+                                        icon="i-heroicons-x-mark" size="sm" color="gray" square variant="solid" />
+                                </div>
+                            </template>
+
+                        </UPopover>
+                    </div>
+                </div>
 
 
 
