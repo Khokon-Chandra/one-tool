@@ -68,7 +68,7 @@ const links = [{
 
             <div
                 class="my-4 flex-shrink-0 flex items-center border-b border-gray-200 dark:border-gray-800 px-6 gap-x-4 min-w-0 !border-transparent">
-                <logo class="w-24" />
+                <logo class="w-20" />
             </div>
 
             <div class="flex flex-col w-full flex-1 overflow-hidden px-4">
