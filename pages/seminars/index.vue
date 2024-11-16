@@ -19,6 +19,8 @@ const courses = ref(null);
 const loading = ref(true);
 
 
+const isOpenColumn = ref(false);
+
 const showEvent = ref(null);
 
 const selectedItems = ref([])
@@ -81,6 +83,25 @@ const editLinks = [
     ]
 ]
 
+const columns = useLocalStorage('columns', reactive([
+    { label: 'title', status: true },
+    { label: 'subtitle', status: true },
+    { label: 'events', status: true },
+    { label: 'abbreviation', status: false },
+    { label: 'seminar category', status: false },
+    { label: 'location', status: false },
+    { label: 'next event', status: false },
+    { label: 'start date', status: true },
+    { label: 'end date', status: true },
+    { label: 'participant', status: true },
+    { label: 'participants next event', status: false },
+    { label: 'waiting list participants next event', status: false },
+    { label: 'waiting list', status: false },
+    { label: 'last modified from-to', status: false },
+    { label: 'status', status: false },
+    { label: 'active', status: true },
+]));
+
 const fetchCourses = async () => {
     try {
         loading.value = true;
@@ -138,6 +159,8 @@ function toggleSelectAll() {
         <template #default>
             <div class="space-y-6">
 
+                <CourseColumnModal v-model="isOpenColumn" :options="columns" />
+
                 <UBreadcrumb :links="links" :ui="{ ol: 'gap-x-3', li: 'gap-x-3' }">
                     <template #divider>
                         <span class="w-8 h-1 rounded-full bg-gray-300 dark:bg-gray-700" />
@@ -175,10 +198,10 @@ function toggleSelectAll() {
 
 
                     <div class="flex items-center gap-4">
-                        <UInput icon="i-heroicons-magnifying-glass-20-solid" size="sm" color="blue" trailing
-                            placeholder="Search..." />
+                        <UInput type="search" icon="i-heroicons-magnifying-glass-20-solid" size="sm" color="blue"
+                            trailing placeholder="Search..." />
 
-                        <UButton color="gray">Columns</UButton>
+                        <UButton @click="isOpenColumn = true" color="gray">Columns</UButton>
 
                         <UButton color="blue" variant="solid">New Course</UButton>
                     </div>
@@ -194,7 +217,8 @@ function toggleSelectAll() {
                         <thead>
                             <tr>
                                 <th class="th">
-                                    <UCheckbox color="blue" @change="toggleSelectAll" :model-value="isAllSelected" />
+                                    <UCheckbox color="blue" @change="toggleSelectAll" :model-value="isAllSelected"
+                                        :indeterminate="selectedItems.length && selectedItems.length < courses.data.length" />
                                 </th>
                                 <th class="th"></th>
                                 <th class="th">Title</th>
@@ -271,7 +295,7 @@ function toggleSelectAll() {
                                                         <nuxt-link :to="'/events/' + event.id">
                                                             <span class="text-xs font-medium text-blue-500">{{
                                                                 event.title
-                                                            }}</span>
+                                                                }}</span>
                                                         </nuxt-link>
                                                     </td>
                                                     <td class="td">{{ event.city }}</td>

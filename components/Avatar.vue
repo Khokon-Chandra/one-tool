@@ -30,7 +30,15 @@ const logout = () => {
 <template>
     <UDropdown :items="items" :ui="{ item: { disabled: 'cursor-text select-text' } }"
         :popper="{ placement: 'bottom-start' }">
-        <UAvatar src="https://avatars.githubusercontent.com/u/1?v=4" />
+
+        <div class="flex gap-2 items-center">
+            <UAvatar src="https://avatars.githubusercontent.com/u/1?v=4" />
+            <div>
+                <span class="block text-xs font-normal text-gray-600">Welcome</span>
+                <span class="block text-xs font-semibold text-gray-600 dark:text-gray-400">Radsport Caska</span>
+            </div>
+        </div>
+
 
         <template #account="{ item }">
             <div class="text-left">

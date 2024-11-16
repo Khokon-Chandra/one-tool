@@ -116,7 +116,7 @@ onMounted(async () => {
         links[2].label = event.value.title;
 
     } catch (error) {
-        toast.add({ title: error.message });
+        toast.add({ title: error.message, color: 'red' });
     } finally {
         loading.value = false;
     }
