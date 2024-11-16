@@ -83,6 +83,14 @@ const links = reactive([{
     iconClass: 'text-teal-600'
 }]);
 
+const collapse = ref({
+    master: true,
+    event: true,
+    note: true,
+    placeholder: true,
+})
+
+
 
 const fetchSingleEvent = async () => {
     const response = await $axios.get("/calendar-events/" + eventId + "?include=category,user");
@@ -186,16 +194,22 @@ const updateEvent = async (callback) => {
 
         <div v-if="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <UCard class="w-full bg-white dark:bg-gray-800 col-span-2">
+
                 <h4 class="text-sm font-medium text-teal-600 mb-2 uppercase">Event Details</h4>
                 <hr class="w-full dark:border-gray-700/90">
                 <h1 class="text-lg font-bold uppercase text-blue-500 my-3">{{ event.title }}</h1>
 
 
                 <!-- Master data -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Master Data</h6>
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Master Data</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.master ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.master = !collapse.master" />
+                </div>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <table class="w-full mb-8">
+                <table v-show="collapse.master" class="w-full mb-8">
                     <tbody>
                         <tr>
                             <th class="th">Title</th>
@@ -539,10 +553,15 @@ const updateEvent = async (callback) => {
 
 
                 <!-- Seminar content and goals -->
-                <h6 class="text-xs font-semibold text-blue-600 uppercase mb-2">Event Details</h6>
+                <div class="flex items-center justify-between py-3">
+                    <h6 class="text-xs font-semibold text-blue-600 uppercase">Event Details</h6>
+                    <UIcon class="text-lg cursor-pointer"
+                        :name="collapse.event ? 'i-heroicons-chevron-up-solid' : 'i-heroicons-chevron-down-solid'"
+                        @click="collapse.event = !collapse.event" />
+                </div>
                 <hr class="w-full dark:border-gray-700/90">
 
-                <table class="w-full mb-8">
+                <table v-show="collapse.event" class="w-full mb-8">
                     <tbody>
                         <tr>
                             <th class="th">Organizer</th>
@@ -583,10 +602,6 @@ const updateEvent = async (callback) => {
                     </tbody>
 
                 </table>
-
-
-
-
 
             </UCard>
         </div>
